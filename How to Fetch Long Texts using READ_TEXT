@@ -1,0 +1,108 @@
+How to Fetch Long Texts in SAP (Using READ_TEXT)
+SAP stores long texts (like Sales Order notes, Billing Document item texts, or Material PO texts) in cluster tables (STXL and STXH). Because they are stored in a compressed, raw format, you cannot fetch them using a standard SELECT statement on the application tables (e.g., VBRK/VBRP). You must use the Function Module READ_TEXT.
+
+Here is the standard workflow to identify, verify, and write the code for any long text in SAP.
+
+Step 1: Identify the Text Parameters (TDID, TDOBJECT, TDNAME)
+To use READ_TEXT, you need the text's exact storage parameters.
+
+Method A: The ABAP Editor Shortcut (Recommended & Fastest)
+
+Go to your transaction (e.g., VF02 for Billing).
+
+Double-click on the text field you want to fetch to open the SAP Script Text Editor.
+
+In the top menu, navigate to Goto -> Header.
+
+A popup will display the exact parameters you need:
+
+Text Object (TDOBJECT): e.g., VBBP (Billing Item)
+
+Text ID (TDID): e.g., 0001
+
+Text Name (TDNAME): e.g., 90000012000010 (Usually a combination of Document Number + Item Number)
+
+Language: e.g., E
+
+Method B: The ST05 SQL Trace (Your Approach)
+
+Open ST05 and activate the trace.
+
+Open VF02, modify or view the text, and save/exit.
+
+Deactivate and display the trace in ST05.
+
+Search the trace logs for operations on table STXH (the text header table).
+
+Inspect the SQL statement variables to extract the TDOBJECT, TDID, and TDNAME.
+
+Step 2: Verify the Parameters in SE37
+Before writing code, verify you have the correct parameters.
+
+Open transaction SE37.
+
+Enter Function Module READ_TEXT and click Test (F8).
+
+Input your parameters:
+
+CLIENT: (Leave blank or enter your client)
+
+ID: 0001 (Your TDID)
+
+LANGUAGE: EN or E
+
+NAME: (The concatenated document/item number you found)
+
+OBJECT: VBBP (Your TDOBJECT)
+
+Execute. Click the Result button next to the LINES table. If your text appears, your parameters are correct.
+
+Step 3: ABAP Implementation
+Here is the optimized ABAP template based on your code.
+
+Pro Tip: You do not need to do a SELECT COUNT(*) on STXH before calling READ_TEXT. The Function Module automatically handles missing texts by returning sy-subrc = 4 (not_found). Skipping the SELECT query improves program performance.
+
+
+* 1. Data Declarations
+DATA: lv_tdname TYPE stxh-tdname,
+      lt_lines  TYPE TABLE OF tline,
+      ls_line   TYPE tline.
+
+* 2. Build the TDNAME (For item texts, it is usually Header + Item)
+* Example: Billing Document (VBELN) + Item (POSNR)
+CONCATENATE wyinvdp_dtl-vbeln wyinvdp_dtl-posnr INTO lv_tdname.
+
+* 3. Fetch the Long Text
+CALL FUNCTION 'READ_TEXT'
+  EXPORTING
+    client                  = sy-mandt
+    id                      = '0001'           " Replace with your TDID
+    language                = sy-langu
+    name                    = lv_tdname
+    object                  = 'VBBP'           " Replace with your TDOBJECT
+  TABLES
+    lines                   = lt_lines
+  EXCEPTIONS
+    id                      = 1
+    language                = 2
+    name                    = 3
+    not_found               = 4
+    object                  = 5
+    reference_check         = 6
+    wrong_access_to_archive = 7
+    OTHERS                  = 8.
+
+* 4. Process the Retrieved Text
+IF sy-subrc = 0.
+  " Read the first line of the text
+  READ TABLE lt_lines INTO ls_line INDEX 1.
+  IF sy-subrc = 0 AND ls_line-tdline IS NOT INITIAL.
+    witems-product_desc = ls_line-tdline.
+  ENDIF.
+  
+  " Note: If you need ALL lines of a multi-line text combined into one string:
+  " DATA: lv_full_text TYPE string.
+  " LOOP AT lt_lines INTO ls_line.
+  "   CONCATENATE lv_full_text ls_line-tdline INTO lv_full_text SEPARATED BY space.
+  " ENDLOOP.
+ENDIF.
