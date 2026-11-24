@@ -1,114 +1,454 @@
-1. Replace src/components/dashboard/StatCard.jsx
+// import { useState } from 'react';
+// import {
+//   LayoutDashboard, Boxes, ClipboardList, Workflow, Users, BarChart3,
+//   Settings, Bell, Search, ChevronDown, Plus, Clock3, CheckCircle2,
+//   AlertCircle, ArrowUpRight, Menu
+// } from 'lucide-react';
+// import { dashboardStats, recentMolds, pendingTasks } from './data/mockData.js';
 
-import React from 'react';
-import {
-  Package,
-  CheckCircle,
-  Wrench,
-  Clock
-} from 'lucide-react';
+// const nav = [
+//   { label: 'Overview', icon: LayoutDashboard, section: 'WORKSPACE' },
+//   { label: 'Mold Register', icon: Boxes },
+//   { label: 'Trial Management', icon: ClipboardList },
+//   { label: 'Task & Workflow', icon: Workflow },
+//   { label: 'Users & Roles', icon: Users, section: 'ADMINISTRATION' },
+//   { label: 'Reports', icon: BarChart3 },
+//   { label: 'Settings', icon: Settings }
+// ];
 
-const iconMap = {
-  Package,
-  CheckCircle,
-  Wrench,
-  Clock
-};
+// function App() {
+//   const [active, setActive] = useState('Overview');
+//   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-function StatCard({ title, value, icon, color, trend }) {
-  const Icon = iconMap[icon] || Package;
+//   return <div className="app-shell">
+//     <aside className={`sidebar ${sidebarOpen ? '' : 'collapsed'}`}>
+//       <div className="brand"><div className="brand-mark">M</div><div><strong>MRTMS</strong><small>Mold Tracking System</small></div></div>
+//       <div className="dept-chip">MOLDING DEPARTMENT</div>
+//       <nav>{nav.map((item, i) => <div key={item.label}>
+//         {item.section && <p className="nav-section">{item.section}</p>}
+//         <button className={`nav-link ${active === item.label ? 'active' : ''}`} onClick={() => setActive(item.label)}>
+//           <item.icon size={18}/><span>{item.label}</span>
+//         </button>
+//       </div>)}</nav>
+//       <div className="sidebar-bottom"><div className="avatar">AD</div><div><strong>Demo User</strong><small>Molding Manager</small></div><ChevronDown size={16}/></div>
+//     </aside>
+
+//     <main className="main">
+//       <header className="topbar">
+//         <button className="icon-btn mobile-menu" onClick={() => setSidebarOpen(!sidebarOpen)}><Menu size={19}/></button>
+//         <div className="breadcrumb">MRTMS <span>/</span> {active}</div>
+//         <div className="top-actions"><div className="search"><Search size={16}/><input placeholder="Search molds, trials, tasks..." /></div><button className="icon-btn"><Bell size={18}/><i/></button><div className="top-avatar">AD</div></div>
+//       </header>
+
+//       {active === 'Overview' ? <Dashboard onNavigate={setActive}/> : <ModulePlaceholder name={active}/>}
+//     </main>
+//   </div>;
+// }
+
+// function Dashboard({ onNavigate }) {
+//   return <div className="content">
+//     <div className="page-heading"><div><p className="eyebrow">MOLDING DEPARTMENT</p><h1>Dashboard</h1><p className="muted">Monitor mold activities, trials and pending work.</p></div><button className="primary" onClick={() => onNavigate('Mold Register')}><Plus size={17}/> Register New Mold</button></div>
+//     <div className="stat-grid">{dashboardStats.map((s, i) => <div className="stat-card" key={s.label}><div className={`stat-icon tone-${i}`}>{i===0?<Boxes/>:i===1?<ClipboardList/>:i===2?<Clock3/>:<CheckCircle2/>}</div><p>{s.label}</p><strong>{s.value}</strong><small>{s.note}</small></div>)}</div>
+//     <div className="two-col">
+//       <section className="panel"><div className="panel-head"><div><h2>Recent Molds</h2><p>Latest registered mold records</p></div><button className="text-btn" onClick={() => onNavigate('Mold Register')}>View all <ArrowUpRight size={14}/></button></div>
+//         <div className="table-wrap"><table><thead><tr><th>MOLD NUMBER</th><th>PRODUCT / CUSTOMER</th><th>STATUS</th><th>UPDATED</th></tr></thead><tbody>{recentMolds.map(m=><tr key={m.code}><td><strong>{m.code}</strong><small>{m.name}</small></td><td>{m.product}<small>{m.customer}</small></td><td><span className={`status ${m.statusClass}`}>{m.status}</span></td><td>{m.updated}</td></tr>)}</tbody></table></div>
+//       </section>
+//       <section className="panel"><div className="panel-head"><div><h2>Pending Tasks</h2><p>Items requiring attention</p></div><button className="text-btn" onClick={() => onNavigate('Task & Workflow')}>View all <ArrowUpRight size={14}/></button></div>
+//         <div className="task-list">{pendingTasks.map(t=><div className="task-item" key={t.title}><div className={`task-symbol ${t.priority}`}><AlertCircle size={17}/></div><div className="task-info"><strong>{t.title}</strong><small>{t.mold} · Due {t.due}</small></div><span className={`priority ${t.priority}`}>{t.priority}</span></div>)}</div>
+//       </section>
+//     </div>
+//     <div className="notice"><strong>Prototype data:</strong> This dashboard currently displays sample records. Connect the backend API after the screen layout and business requirements are approved.</div>
+//   </div>;
+// }
+
+// function ModulePlaceholder({ name }) {
+//   const descriptions = {
+//     'Mold Register': 'Register new molds, maintain mold specifications, customer and product links, and view mold history.',
+//     'Trial Management': 'Plan trials, record machine parameters, capture observations, results and feedback.',
+//     'Task & Workflow': 'Assign activities, set due dates, update progress, review task history and close work.',
+//     'Users & Roles': 'Manage employee accounts, department membership, roles and permission assignments.',
+//     'Reports': 'View mold status, trial history, overdue activities and department performance reports.',
+//     'Settings': 'Maintain lookup values, statuses, numbering rules and application configuration.'
+//   };
+//   return <div className="content"><div className="page-heading"><div><p className="eyebrow">MRTMS MODULE</p><h1>{name}</h1><p className="muted">{descriptions[name]}</p></div></div>
+//     <div className="panel placeholder"><div className="placeholder-icon"><Settings size={28}/></div><h2>{name} screen</h2><p>This is a planned module. Confirm its fields and actions with the Molding Manager before implementing the form and API.</p><div className="planned-list"><span>✓ Define required fields</span><span>✓ Define user actions and permissions</span><span>✓ Define validation and status transitions</span><span>✓ Agree API contract</span></div></div>
+//   </div>;
+// }
+
+// export default App;
+
+
+import React, { useState } from 'react';
+
+import Sidebar from './components/layout/Sidebar';
+import Header from './components/layout/Header';
+import Breadcrumb from './components/layout/Breadcrumb';
+import PageHeader from './components/layout/PageHeader';
+
+import Button from './components/common/Button';
+import SearchBar from './components/common/SearchBar';
+import StatusBadge from './components/common/StatusBadge';
+
+import StatCard from './components/dashboard/StatCard';
+import RecentMolds from './components/dashboard/RecentMolds';
+import PendingTasks from './components/dashboard/PendingTasks';
+
+const moldRecords = [
+  {
+    id: 1,
+    moldCode: 'MOLD-001',
+    moldName: 'Front Cover Mold',
+    partName: 'Front Cover',
+    machine: 'IMM-250',
+    status: 'ACTIVE',
+    location: 'Molding',
+    updatedAt: '24 Nov 2026'
+  },
+  {
+    id: 2,
+    moldCode: 'MOLD-002',
+    moldName: 'Rear Housing Mold',
+    partName: 'Rear Housing',
+    machine: 'IMM-350',
+    status: 'UNDER_TRIAL',
+    location: 'Trial Room',
+    updatedAt: '23 Nov 2026'
+  },
+  {
+    id: 3,
+    moldCode: 'MOLD-003',
+    moldName: 'Handle Mold',
+    partName: 'Handle',
+    machine: 'IMM-180',
+    status: 'UNDER_MAINTENANCE',
+    location: 'Maintenance',
+    updatedAt: '22 Nov 2026'
+  }
+];
+
+const pendingTasks = [
+  {
+    id: 1,
+    title: 'MOLD-003 - Maintenance inspection',
+    description: 'Complete the scheduled inspection',
+    dueDate: 'Today',
+    priority: 'High'
+  },
+  {
+    id: 2,
+    title: 'MOLD-002 - Trial approval',
+    description: 'Trial result awaiting approval',
+    dueDate: 'Tomorrow',
+    priority: 'Medium'
+  },
+  {
+    id: 3,
+    title: 'MOLD-015 - Update mold details',
+    description: 'Complete missing mold information',
+    dueDate: '26 Nov 2026',
+    priority: 'Low'
+  }
+];
+
+function App() {
+  const [activePath, setActivePath] = useState('/dashboard');
+  const [search, setSearch] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigation = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/mold-register', label: 'Mold Register' },
+    { path: '/add-mold', label: 'Add New Mold' },
+    { path: '/mold-history', label: 'Mold History' },
+    { path: '/maintenance', label: 'Maintenance' },
+    { path: '/reports', label: 'Reports' }
+  ];
+
+  const activeItem =
+    navigation.find(item => item.path === activePath);
+
+  const pageTitle = activeItem?.label || 'Dashboard';
+
+  const filteredMolds = moldRecords.filter(mold =>
+    `${mold.moldCode} ${mold.moldName} ${mold.partName}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  const handleNavigate = path => {
+    setActivePath(path);
+    setSearch('');
+    setMenuOpen(false);
+  };
 
   return (
-    <div className={`stat-card stat-card-${color || 'blue'}`}>
-      <div className="stat-card-content">
-        <div className="stat-card-info">
-          <p className="stat-card-title">{title}</p>
-          <h2 className="stat-card-value">{value}</h2>
-          <span className="stat-card-trend">{trend}</span>
-        </div>
+    <div className="app-shell">
 
-        <div className="stat-card-icon">
-          <Icon size={25} strokeWidth={2} />
-        </div>
+      <Sidebar
+        activePath={activePath}
+        onNavigate={handleNavigate}
+      />
+
+      <div className="app-main">
+
+        <Header
+          onMenuClick={() => setMenuOpen(!menuOpen)}
+          user={{
+            name: 'Molding Admin',
+            role: 'Molding Department'
+          }}
+        />
+
+        <main className="page-content">
+
+          <Breadcrumb
+            items={['Home', pageTitle]}
+          />
+
+          <PageHeader
+            title={pageTitle}
+            subtitle={
+              activePath === '/dashboard'
+                ? 'Monitor mold activities and department performance.'
+                : `Manage ${pageTitle.toLowerCase()} information.`
+            }
+            actions={
+              activePath === '/dashboard' ? (
+                <Button
+                  variant="primary"
+                  onClick={() => handleNavigate('/add-mold')}
+                >
+                  + Register New Mold
+                </Button>
+              ) : null
+            }
+          />
+
+          {activePath === '/dashboard' && (
+            <>
+              <section className="stats-grid">
+
+                <StatCard
+                  title="Total Molds"
+                  value="248"
+                  icon="Package"
+                  color="blue"
+                  trend="+12 this month"
+                />
+
+                <StatCard
+                  title="Active Molds"
+                  value="186"
+                  icon="CheckCircle"
+                  color="green"
+                  trend="Currently active"
+                />
+
+                <StatCard
+                  title="Under Maintenance"
+                  value="18"
+                  icon="Wrench"
+                  color="orange"
+                  trend="Needs attention"
+                />
+
+                <StatCard
+                  title="Pending Tasks"
+                  value="12"
+                  icon="Clock"
+                  color="red"
+                  trend="Awaiting action"
+                />
+
+              </section>
+
+              <section className="dashboard-grid">
+
+                <div className="panel dashboard-molds">
+                  <div className="panel-heading">
+                    <div>
+                      <h3>Recent Mold Records</h3>
+                      <p>Recently updated mold information</p>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() =>
+                        handleNavigate('/mold-register')
+                      }
+                    >
+                      View All
+                    </Button>
+                  </div>
+
+                  <SearchBar
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search mold code or name..."
+                  />
+
+                  <div className="mold-record-list">
+                    {filteredMolds.map(mold => (
+                      <div className="mold-record" key={mold.id}>
+                        <div className="mold-record-info">
+                          <strong>{mold.moldCode}</strong>
+                          <span>{mold.moldName}</span>
+                          <small>{mold.machine} · {mold.location}</small>
+                        </div>
+
+                        <StatusBadge status={mold.status} />
+                      </div>
+                    ))}
+
+                    {filteredMolds.length === 0 && (
+                      <p className="no-records">
+                        No matching mold records found.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="panel dashboard-tasks">
+                  <PendingTasks tasks={pendingTasks} />
+                </div>
+
+              </section>
+            </>
+          )}
+
+          {activePath === '/mold-register' && (
+            <section className="panel">
+              <div className="panel-heading">
+                <div>
+                  <h3>Mold Register</h3>
+                  <p>All registered molding tools</p>
+                </div>
+
+                <Button
+                  onClick={() => handleNavigate('/add-mold')}
+                >
+                  + Add Mold
+                </Button>
+              </div>
+
+              <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search mold records..."
+              />
+
+              <div className="mold-record-list">
+                {filteredMolds.map(mold => (
+                  <div className="mold-record" key={mold.id}>
+                    <div className="mold-record-info">
+                      <strong>{mold.moldCode}</strong>
+                      <span>{mold.moldName}</span>
+                      <small>{mold.partName} · {mold.machine}</small>
+                    </div>
+                    <StatusBadge status={mold.status} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {activePath !== '/dashboard' &&
+            activePath !== '/mold-register' && (
+              <section className="panel module-placeholder">
+                <h3>{pageTitle}</h3>
+                <p>
+                  This module will be designed using the reusable
+                  MRTMS components in the next development stage.
+                </p>
+              </section>
+            )}
+
+        </main>
       </div>
     </div>
   );
 }
 
-export default StatCard;
+export default App;
 
 
 
-2. Add or update the StatCard CSS
-Add this at the bottom of components.css:
+import {
+  LayoutDashboard,
+  Boxes,
+  ClipboardList,
+  Workflow,
+  BarChart3,
+  Users,
+  Settings,
+  Factory
+} from 'lucide-react';
 
-.stat-card {
-  background: #ffffff;
-  border: 1px solid #e7eaf0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(20, 35, 60, 0.04);
-  min-width: 0;
+const menuGroups = [
+  {
+    title: 'WORKSPACE',
+    items: [
+      { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+      { label: 'Mold Register', path: '/molds', icon: Boxes },
+      { label: 'Trial Management', path: '/trials', icon: ClipboardList },
+      { label: 'Task & Workflow', path: '/tasks', icon: Workflow },
+      { label: 'Reports', path: '/reports', icon: BarChart3 }
+    ]
+  },
+  {
+    title: 'ADMINISTRATION',
+    items: [
+      { label: 'Users & Roles', path: '/users', icon: Users },
+      { label: 'Master Settings', path: '/settings', icon: Settings }
+    ]
+  }
+];
+
+export default function Sidebar({ activePath = '/dashboard', onNavigate }) {
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <div className="brand-logo"><Factory size={22} /></div>
+        <div>
+          <strong>MRTMS</strong>
+          <small>Mold Tracking System</small>
+        </div>
+      </div>
+
+      <div className="department-label">
+        MOLDING DEPARTMENT
+      </div>
+
+      <nav className="sidebar-nav">
+        {menuGroups.map(group => (
+          <div key={group.title}>
+            <p className="nav-heading">{group.title}</p>
+
+            {group.items.map(item => {
+              const Icon = item.icon;
+              const active = activePath === item.path;
+
+              return (
+                <button
+                  key={item.path}
+                  className={`nav-item ${active ? 'active' : ''}`}
+                  onClick={() => onNavigate?.(item.path)}
+                >
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+
+      <div className="sidebar-footer">
+        <span className="online-dot" />
+        Molding Department
+      </div>
+    </aside>
+  );
 }
 
-.stat-card-content {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.stat-card-title {
-  color: #778197;
-  font-size: 13px;
-  margin: 0 0 10px;
-}
-
-.stat-card-value {
-  color: #172033;
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 8px;
-}
-
-.stat-card-trend {
-  color: #8992a3;
-  font-size: 12px;
-}
-
-.stat-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: #eff6ff;
-  color: #2563eb;
-  flex-shrink: 0;
-}
-
-.stat-card-green .stat-card-icon {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.stat-card-orange .stat-card-icon {
-  background: #fff7ed;
-  color: #ea580c;
-}
-
-.stat-card-red .stat-card-icon {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-
-
-3. Check your installation
-If you haven't installed Lucide React, run this in your frontend terminal:
-npm install lucide-react
-
-
-Then restart:
-npm run dev
