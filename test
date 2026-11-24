@@ -1,95 +1,320 @@
-return (
-  <div className="app-shell">
-    <Sidebar
-      activePath={activePath}
-      onNavigate={handleNavigate}
-    />
-
-    <div className="app-main">
-      <Header
-        onMenuClick={() => setMenuOpen(!menuOpen)}
-        user={{
-          name: 'Molding Admin',
-          role: 'Molding Department'
-        }}
-      />
-
-      <main className="page-content">
-        {/* Keep your existing dashboard and page content here */}
-      </main>
-    </div>
-  </div>
-);
-
-
-
-
-
-/* FIX: Sidebar and Main Content Alignment */
-
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-.app-shell {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch;
-  width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.app-shell > .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 260px;
-  height: 100vh;
-  flex-shrink: 0;
-  z-index: 100;
-}
-
-.app-main {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  width: calc(100% - 260px);
-  min-width: 0;
-  min-height: 100vh;
-  margin-left: 260px;
-}
-
-.app-main > * {
-  min-width: 0;
-}
-
-.page-content {
-  width: 100%;
-  flex: 1;
-  padding: 28px 32px;
-}
-
-@media (max-width: 768px) {
-  .app-shell > .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .app-main {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .page-content {
-    padding: 18px 14px;
-  }
-}
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: The tag <Package> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: The tag <CheckCircle> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: The tag <Wrench> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: The tag <Clock> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Package /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Package
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <CheckCircle /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at CheckCircle
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Wrench /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Wrench
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
+chunk-SVG7M4VJ.js?v=33e5c9e9:519 Warning: <Clock /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.
+    at Clock
+    at div
+    at div
+    at StatCard (http://localhost:5173/src/components/dashboard/StatCard.jsx:18:3)
+    at section
+    at main
+    at div
+    at div
+    at App (http://localhost:5173/src/App.jsx?t=1795519214963:86:39)
