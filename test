@@ -6,61 +6,148 @@ import Header from './components/layout/Header';
 import Breadcrumb from './components/layout/Breadcrumb';
 import PageHeader from './components/layout/PageHeader';
 
+import Button from './components/common/Button';
+import SearchBar from './components/common/SearchBar';
+import StatusBadge from './components/common/StatusBadge';
+
 import StatCard from './components/dashboard/StatCard';
 import RecentMolds from './components/dashboard/RecentMolds';
 import PendingTasks from './components/dashboard/PendingTasks';
 
+const moldRecords = [
+  {
+    id: 1,
+    moldCode: 'MOLD-001',
+    moldName: 'Front Cover Mold',
+    partName: 'Front Cover',
+    machine: 'IMM-250',
+    status: 'ACTIVE',
+    location: 'Molding',
+    updatedAt: '24 Nov 2026'
+  },
+  {
+    id: 2,
+    moldCode: 'MOLD-002',
+    moldName: 'Rear Housing Mold',
+    partName: 'Rear Housing',
+    machine: 'IMM-350',
+    status: 'UNDER_TRIAL',
+    location: 'Trial Room',
+    updatedAt: '23 Nov 2026'
+  },
+  {
+    id: 3,
+    moldCode: 'MOLD-003',
+    moldName: 'Handle Mold',
+    partName: 'Handle',
+    machine: 'IMM-180',
+    status: 'UNDER_MAINTENANCE',
+    location: 'Maintenance',
+    updatedAt: '22 Nov 2026'
+  }
+];
+
+const pendingTasks = [
+  {
+    id: 1,
+    title: 'MOLD-003 - Maintenance inspection',
+    description: 'Complete the scheduled inspection',
+    dueDate: 'Today',
+    priority: 'High'
+  },
+  {
+    id: 2,
+    title: 'MOLD-002 - Trial approval',
+    description: 'Trial result awaiting approval',
+    dueDate: 'Tomorrow',
+    priority: 'Medium'
+  },
+  {
+    id: 3,
+    title: 'MOLD-015 - Update mold details',
+    description: 'Complete missing mold information',
+    dueDate: '26 Nov 2026',
+    priority: 'Low'
+  }
+];
+
 function App() {
-  const [activePage, setActivePage] = useState('Dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activePath, setActivePath] = useState('/dashboard');
+  const [search, setSearch] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleNavigate = (page) => {
-    setActivePage(page);
-    setSidebarOpen(false);
-  };
+  const navigation = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/mold-register', label: 'Mold Register' },
+    { path: '/add-mold', label: 'Add New Mold' },
+    { path: '/mold-history', label: 'Mold History' },
+    { path: '/maintenance', label: 'Maintenance' },
+    { path: '/reports', label: 'Reports' }
+  ];
 
-  const pageDescriptions = {
-    Dashboard: 'Overview of mold activities and department performance',
-    'Mold Register': 'View and manage all registered molds',
-    'Add Mold': 'Register a new mold in the system',
-    'Mold History': 'Track mold movement and maintenance history',
-    'Mold Maintenance': 'Manage mold maintenance activities',
-    Reports: 'View mold reports and department analytics',
-    Settings: 'Manage system settings'
+  const activeItem =
+    navigation.find(item => item.path === activePath);
+
+  const pageTitle = activeItem?.label || 'Dashboard';
+
+  const filteredMolds = moldRecords.filter(mold =>
+    `${mold.moldCode} ${mold.moldName} ${mold.partName}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  const handleNavigate = path => {
+    setActivePath(path);
+    setSearch('');
+    setMenuOpen(false);
   };
 
   return (
-    <div className="app-layout">
+    <div className="app-shell">
 
       <Sidebar
-        activePage={activePage}
+        activePath={activePath}
         onNavigate={handleNavigate}
-        isOpen={sidebarOpen}
       />
 
-      <div className="main-content">
+      <div className="app-main">
 
         <Header
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          onMenuClick={() => setMenuOpen(!menuOpen)}
+          user={{
+            name: 'Molding Admin',
+            role: 'Molding Department'
+          }}
         />
 
         <main className="page-content">
 
           <Breadcrumb
-            items={['Home', activePage]}
+            items={['Home', pageTitle]}
           />
 
           <PageHeader
-            title={activePage}
-            description={
-              pageDescriptions[activePage] ||
-              'Manage your molding department activities'
+            title={pageTitle}
+            subtitle={
+              activePath === '/dashboard'
+                ? 'Monitor mold activities and department performance.'
+                : `Manage ${pageTitle.toLowerCase()} information.`
+            }
+            actions={
+              activePath === '/dashboard' ? (
+                <Button
+                  variant="primary"
+                  onClick={() => handleNavigate('/add-mold')}
+                >
+                  + Register New Mold
+                </Button>
+              ) : null
             }
           />
 
-          {activePage === 'Dashboard' && (
+          {activePath === '/dashboard' && (
             <>
-              <section className="dashboard-stats">
+              <section className="stats-grid">
 
                 <StatCard
                   title="Total Molds"
@@ -75,7 +162,7 @@ function App() {
                   value="186"
                   icon="CheckCircle"
                   color="green"
-                  trend="Currently in use"
+                  trend="Currently active"
                 />
 
                 <StatCard
@@ -83,7 +170,7 @@ function App() {
                   value="18"
                   icon="Wrench"
                   color="orange"
-                  trend="Requires attention"
+                  trend="Needs attention"
                 />
 
                 <StatCard
@@ -98,34 +185,295 @@ function App() {
 
               <section className="dashboard-grid">
 
-                <div className="dashboard-main-card">
-                  <RecentMolds />
+                <div className="panel dashboard-molds">
+                  <div className="panel-heading">
+                    <div>
+                      <h3>Recent Mold Records</h3>
+                      <p>Recently updated mold information</p>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() =>
+                        handleNavigate('/mold-register')
+                      }
+                    >
+                      View All
+                    </Button>
+                  </div>
+
+                  <SearchBar
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search mold code or name..."
+                  />
+
+                  <div className="mold-record-list">
+                    {filteredMolds.map(mold => (
+                      <div className="mold-record" key={mold.id}>
+                        <div className="mold-record-info">
+                          <strong>{mold.moldCode}</strong>
+                          <span>{mold.moldName}</span>
+                          <small>{mold.machine} · {mold.location}</small>
+                        </div>
+
+                        <StatusBadge status={mold.status} />
+                      </div>
+                    ))}
+
+                    {filteredMolds.length === 0 && (
+                      <p className="no-records">
+                        No matching mold records found.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="dashboard-side-card">
-                  <PendingTasks />
+                <div className="panel dashboard-tasks">
+                  <PendingTasks tasks={pendingTasks} />
                 </div>
 
               </section>
             </>
           )}
 
-          {activePage !== 'Dashboard' && (
-            <div className="content-card">
-              <h3>{activePage}</h3>
-              <p>
-                The {activePage} module will be developed in the
-                next stage of MRTMS frontend development.
-              </p>
-            </div>
+          {activePath === '/mold-register' && (
+            <section className="panel">
+              <div className="panel-heading">
+                <div>
+                  <h3>Mold Register</h3>
+                  <p>All registered molding tools</p>
+                </div>
+
+                <Button
+                  onClick={() => handleNavigate('/add-mold')}
+                >
+                  + Add Mold
+                </Button>
+              </div>
+
+              <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search mold records..."
+              />
+
+              <div className="mold-record-list">
+                {filteredMolds.map(mold => (
+                  <div className="mold-record" key={mold.id}>
+                    <div className="mold-record-info">
+                      <strong>{mold.moldCode}</strong>
+                      <span>{mold.moldName}</span>
+                      <small>{mold.partName} · {mold.machine}</small>
+                    </div>
+                    <StatusBadge status={mold.status} />
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
+          {activePath !== '/dashboard' &&
+            activePath !== '/mold-register' && (
+              <section className="panel module-placeholder">
+                <h3>{pageTitle}</h3>
+                <p>
+                  This module will be designed using the reusable
+                  MRTMS components in the next development stage.
+                </p>
+              </section>
+            )}
+
         </main>
-
       </div>
-
     </div>
   );
 }
 
 export default App;
+
+
+
+
+2. Add this CSS at the bottom of assets/styles/components.css
+This adds the application shell, dashboard layout, mold records, and responsive styling.
+
+/* MRTMS Application Layout */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-background, #f5f7fb);
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: 260px;
+}
+
+.page-content {
+  padding: 28px 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Dashboard statistics */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  margin: 24px 0;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(20, 35, 60, 0.04);
+  min-width: 0;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.panel-heading h3 {
+  font-size: 17px;
+  font-weight: 650;
+  color: #172033;
+  margin: 0 0 5px;
+}
+
+.panel-heading p {
+  color: #778197;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Mold Records */
+
+.mold-record-list {
+  margin-top: 18px;
+}
+
+.mold-record {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 16px 0;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.mold-record:last-child {
+  border-bottom: none;
+}
+
+.mold-record-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.mold-record-info strong {
+  color: #2563eb;
+  font-size: 13px;
+}
+
+.mold-record-info span {
+  color: #202b3c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mold-record-info small {
+  color: #8992a3;
+  font-size: 12px;
+}
+
+.no-records {
+  padding: 25px 0;
+  text-align: center;
+  color: #8992a3;
+  font-size: 14px;
+}
+
+.module-placeholder {
+  margin-top: 24px;
+  min-height: 220px;
+}
+
+.module-placeholder h3 {
+  color: #172033;
+}
+
+.module-placeholder p {
+  color: #778197;
+  line-height: 1.6;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1100px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-main {
+    margin-left: 0;
+  }
+
+  .page-content {
+    padding: 20px 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+}
+
+
+
+3. How the frontend will be organized
+We should keep the following responsibilities separate:
+Folder	Responsibility
+assets/styles	Application colors, layout, typography and responsive design
+components/layout	Sidebar, header, page header and navigation
+components/common	Buttons, inputs, badges, modals and reusable controls
+components/tables	Data tables, filters and pagination
+components/forms	Reusable form sections and fields
+components/dashboard	Dashboard cards, recent molds and pending tasks
+App.jsx	Connects the application components and manages navigation
+
+
+
+
+
+
