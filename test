@@ -1,3 +1,131 @@
-App.jsx:91 Uncaught ReferenceError: Cannot access 'App' before initialization
-    at App.jsx:91:6
-(anonymous)	@	App.jsx:91
+
+import React, { useState } from 'react';
+
+import Sidebar from './components/layout/Sidebar';
+import Header from './components/layout/Header';
+import Breadcrumb from './components/layout/Breadcrumb';
+import PageHeader from './components/layout/PageHeader';
+
+import StatCard from './components/dashboard/StatCard';
+import RecentMolds from './components/dashboard/RecentMolds';
+import PendingTasks from './components/dashboard/PendingTasks';
+
+function App() {
+  const [activePage, setActivePage] = useState('Dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleNavigate = (page) => {
+    setActivePage(page);
+    setSidebarOpen(false);
+  };
+
+  const pageDescriptions = {
+    Dashboard: 'Overview of mold activities and department performance',
+    'Mold Register': 'View and manage all registered molds',
+    'Add Mold': 'Register a new mold in the system',
+    'Mold History': 'Track mold movement and maintenance history',
+    'Mold Maintenance': 'Manage mold maintenance activities',
+    Reports: 'View mold reports and department analytics',
+    Settings: 'Manage system settings'
+  };
+
+  return (
+    <div className="app-layout">
+
+      <Sidebar
+        activePage={activePage}
+        onNavigate={handleNavigate}
+        isOpen={sidebarOpen}
+      />
+
+      <div className="main-content">
+
+        <Header
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        />
+
+        <main className="page-content">
+
+          <Breadcrumb
+            items={['Home', activePage]}
+          />
+
+          <PageHeader
+            title={activePage}
+            description={
+              pageDescriptions[activePage] ||
+              'Manage your molding department activities'
+            }
+          />
+
+          {activePage === 'Dashboard' && (
+            <>
+              <section className="dashboard-stats">
+
+                <StatCard
+                  title="Total Molds"
+                  value="248"
+                  icon="Package"
+                  color="blue"
+                  trend="+12 this month"
+                />
+
+                <StatCard
+                  title="Active Molds"
+                  value="186"
+                  icon="CheckCircle"
+                  color="green"
+                  trend="Currently in use"
+                />
+
+                <StatCard
+                  title="Under Maintenance"
+                  value="18"
+                  icon="Wrench"
+                  color="orange"
+                  trend="Requires attention"
+                />
+
+                <StatCard
+                  title="Pending Tasks"
+                  value="12"
+                  icon="Clock"
+                  color="red"
+                  trend="Awaiting action"
+                />
+
+              </section>
+
+              <section className="dashboard-grid">
+
+                <div className="dashboard-main-card">
+                  <RecentMolds />
+                </div>
+
+                <div className="dashboard-side-card">
+                  <PendingTasks />
+                </div>
+
+              </section>
+            </>
+          )}
+
+          {activePage !== 'Dashboard' && (
+            <div className="content-card">
+              <h3>{activePage}</h3>
+              <p>
+                The {activePage} module will be developed in the
+                next stage of MRTMS frontend development.
+              </p>
+            </div>
+          )}
+
+        </main>
+
+      </div>
+
+    </div>
+  );
+}
+
+export default App;
