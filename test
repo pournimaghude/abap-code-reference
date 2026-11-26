@@ -138,3 +138,627 @@ For now, add these conditions around your existing page sections:
 
 
 This is the structure we will use until all screens are implemented. Don't add a placeholder condition that applies to every page except Dashboard.
+
+
+
+1. src/App.jsx
+Replace the complete contents of App.jsx with:
+import React, { useState } from "react";
+import AppLayout from "./components/layout/AppLayout";
+
+const menuPages = {
+  dashboard: "Dashboard",
+  molds: "Mold Register",
+  trials: "Trial Management",
+  tasks: "Task & Workflow",
+  reports: "Reports",
+  users: "Users & Roles",
+  settings: "Master Settings",
+};
+
+const dashboardStats = [
+  { title: "Total Molds", value: "248", change: "Registered molds", icon: "▣" },
+  { title: "Active Molds", value: "186", change: "Currently active", icon: "◉" },
+  { title: "Under Maintenance", value: "18", change: "Maintenance required", icon: "⚙" },
+  { title: "Pending Activities", value: "32", change: "Awaiting action", icon: "◷" },
+];
+
+const recentMolds = [
+  { moldNo: "MOLD-001", customer: "Customer A", model: "Model X", trial: "T3", status: "In Progress" },
+  { moldNo: "MOLD-002", customer: "Customer B", model: "Model Y", trial: "T2", status: "Pending" },
+  { moldNo: "MOLD-003", customer: "Customer C", model: "Model Z", trial: "T4", status: "Completed" },
+  { moldNo: "MOLD-004", customer: "Customer D", model: "Model P", trial: "T1", status: "Active" },
+];
+
+const pendingTasks = [
+  { mold: "MOLD-001", department: "Tool Room", task: "Mold modification", days: 4 },
+  { mold: "MOLD-002", department: "Maintenance", task: "Mold inspection", days: 2 },
+  { mold: "MOLD-005", department: "Quality", task: "Sample checking", days: 6 },
+];
+
+function Dashboard() {
+  return (
+    <div>
+      <div style={styles.welcome}>
+        <div>
+          <h2 style={styles.heading}>Dashboard Overview</h2>
+          <p style={styles.subtitle}>
+            Monitor mold activities, trials and department progress.
+          </p>
+        </div>
+      </div>
+
+      <div style={styles.statsGrid}>
+        {dashboardStats.map((item) => (
+          <div key={item.title} style={styles.statCard}>
+            <div style={styles.statTop}>
+              <span style={styles.statIcon}>{item.icon}</span>
+              <span style={styles.statLabel}>{item.title}</span>
+            </div>
+            <h2 style={styles.statValue}>{item.value}</h2>
+            <p style={styles.statChange}>{item.change}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={styles.contentGrid}>
+        <section style={styles.panel}>
+          <div style={styles.panelHeader}>
+            <h3 style={styles.panelTitle}>Recent Mold Records</h3>
+            <span style={styles.viewAll}>View All</span>
+          </div>
+
+          <div style={{ overflowX: "auto" }}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Mold No.</th>
+                  <th style={styles.th}>Customer</th>
+                  <th style={styles.th}>Model</th>
+                  <th style={styles.th}>Trial</th>
+                  <th style={styles.th}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentMolds.map((mold) => (
+                  <tr key={mold.moldNo}>
+                    <td style={styles.td}><strong>{mold.moldNo}</strong></td>
+                    <td style={styles.td}>{mold.customer}</td>
+                    <td style={styles.td}>{mold.model}</td>
+                    <td style={styles.td}>{mold.trial}</td>
+                    <td style={styles.td}>
+                      <span style={statusStyle(mold.status)}>{mold.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section style={styles.panel}>
+          <div style={styles.panelHeader}>
+            <h3 style={styles.panelTitle}>Pending Activities</h3>
+            <span style={styles.viewAll}>View All</span>
+          </div>
+
+          {pendingTasks.map((task, index) => (
+            <div key={index} style={styles.taskItem}>
+              <div>
+                <strong style={styles.taskMold}>{task.mold}</strong>
+                <p style={styles.taskDescription}>{task.task}</p>
+                <span style={styles.department}>{task.department}</span>
+              </div>
+              <span style={styles.days}>{task.days} days</span>
+            </div>
+          ))}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function PlaceholderPage({ title }) {
+  return (
+    <div style={styles.panel}>
+      <h2 style={styles.heading}>{title}</h2>
+      <p style={styles.subtitle}>
+        This module will be developed in the next frontend setup step.
+      </p>
+    </div>
+  );
+}
+
+export default function App() {
+  const [activePage, setActivePage] = useState("dashboard");
+
+  const handleNavigate = (page) => {
+    setActivePage(page);
+  };
+
+  return (
+    <AppLayout
+      activePage={activePage}
+      onNavigate={handleNavigate}
+    >
+      {activePage === "dashboard" ? (
+        <Dashboard />
+      ) : (
+        <PlaceholderPage title={menuPages[activePage] || "Page"} />
+      )}
+    </AppLayout>
+  );
+}
+
+function statusStyle(status) {
+  const colors = {
+    "In Progress": { background: "#e0f2fe", color: "#0369a1" },
+    Pending: { background: "#fff7ed", color: "#c2410c" },
+    Completed: { background: "#dcfce7", color: "#15803d" },
+    Active: { background: "#e0e7ff", color: "#4338ca" },
+  };
+
+  return {
+    ...colors[status],
+    padding: "5px 10px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  };
+}
+
+const styles = {
+  welcome: { marginBottom: 22 },
+  heading: { margin: 0, fontSize: 22, color: "#172b4d", fontWeight: 700 },
+  subtitle: { marginTop: 7, color: "#718096", fontSize: 13 },
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+    gap: 18,
+    marginBottom: 22,
+  },
+  statCard: {
+    background: "#fff",
+    border: "1px solid #e8edf3",
+    borderRadius: 10,
+    padding: 20,
+    minWidth: 0,
+  },
+  statTop: { display: "flex", alignItems: "center", gap: 10 },
+  statIcon: {
+    background: "#e6f7f7",
+    color: "#079b9b",
+    borderRadius: 8,
+    padding: "8px 10px",
+    fontSize: 18,
+  },
+  statLabel: { color: "#64748b", fontSize: 13 },
+  statValue: { margin: "15px 0 5px", color: "#172b4d", fontSize: 27 },
+  statChange: { margin: 0, color: "#94a3b8", fontSize: 12 },
+  contentGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1.6fr) minmax(280px, 1fr)",
+    gap: 20,
+    alignItems: "start",
+  },
+  panel: {
+    background: "#fff",
+    border: "1px solid #e8edf3",
+    borderRadius: 10,
+    padding: 20,
+    minWidth: 0,
+  },
+  panelHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 18,
+  },
+  panelTitle: { margin: 0, fontSize: 16, color: "#172b4d" },
+  viewAll: { color: "#079b9b", fontSize: 12, fontWeight: 600 },
+  table: { width: "100%", borderCollapse: "collapse", textAlign: "left" },
+  th: {
+    padding: "12px 10px",
+    color: "#718096",
+    background: "#f8fafc",
+    fontSize: 12,
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  },
+  td: {
+    padding: "14px 10px",
+    borderBottom: "1px solid #edf1f5",
+    color: "#475569",
+    fontSize: 12,
+    whiteSpace: "nowrap",
+  },
+  taskItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+    padding: "14px 0",
+    borderBottom: "1px solid #edf1f5",
+  },
+  taskMold: { color: "#172b4d", fontSize: 13 },
+  taskDescription: { margin: "5px 0", color: "#64748b", fontSize: 12 },
+  department: { color: "#079b9b", fontSize: 11 },
+  days: {
+    color: "#c2410c",
+    background: "#fff7ed",
+    borderRadius: 6,
+    padding: "6px 8px",
+    fontSize: 11,
+    whiteSpace: "nowrap",
+  },
+};
+
+
+2. src/components/layout/AppLayout.jsx
+This file controls the overall screen structure. The sidebar stays on the left, while the header and page content stay together on the right.
+import React, { useState } from "react";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+
+export default function AppLayout({ activePage, onNavigate, children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleNavigate = (page) => {
+    onNavigate(page);
+    setSidebarOpen(false);
+  };
+
+  return (
+    <div style={styles.app}>
+      {sidebarOpen && (
+        <div
+          style={styles.overlay}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        style={{
+          ...styles.sidebar,
+          ...(sidebarOpen ? styles.sidebarOpen : {}),
+        }}
+      >
+        <Sidebar
+          activePage={activePage}
+          onNavigate={handleNavigate}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </aside>
+
+      <div style={styles.main}>
+        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+
+        <main style={styles.content}>
+          {children}
+        </main>
+
+        <footer style={styles.footer}>
+          MRTMS – Mold Tracking & Management System
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  app: {
+    display: "flex",
+    minHeight: "100vh",
+    background: "#f4f7fb",
+    fontFamily: "Arial, sans-serif",
+    position: "relative",
+  },
+  sidebar: {
+    width: 250,
+    minWidth: 250,
+    background: "#142b45",
+    minHeight: "100vh",
+    position: "sticky",
+    top: 0,
+    height: "100vh",
+    overflowY: "auto",
+    zIndex: 20,
+  },
+  main: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+  },
+  content: {
+    flex: 1,
+    padding: 25,
+    minWidth: 0,
+    width: "100%",
+    boxSizing: "border-box",
+  },
+  footer: {
+    padding: "14px 25px",
+    color: "#94a3b8",
+    fontSize: 11,
+    borderTop: "1px solid #e8edf3",
+    background: "#fff",
+  },
+  overlay: {
+    display: "none",
+  },
+  sidebarOpen: {
+    transform: "translateX(0)",
+  },
+};
+
+
+3. src/components/layout/Sidebar.jsx
+This gives you the navigation menu and highlights the currently selected page.
+import React from "react";
+
+const menuItems = [
+  { id: "dashboard", label: "Dashboard", icon: "▦" },
+  { id: "molds", label: "Mold Register", icon: "▣" },
+  { id: "trials", label: "Trial Management", icon: "◷" },
+  { id: "tasks", label: "Task & Workflow", icon: "☷" },
+  { id: "reports", label: "Reports", icon: "▤" },
+  { id: "users", label: "Users & Roles", icon: "♙" },
+  { id: "settings", label: "Master Settings", icon: "⚙" },
+];
+
+export default function Sidebar({ activePage, onNavigate, onClose }) {
+  return (
+    <div style={styles.container}>
+      <div style={styles.brand}>
+        <div style={styles.logo}>M</div>
+        <div>
+          <h2 style={styles.brandName}>MRTMS</h2>
+          <p style={styles.brandSub}>Mold Management</p>
+        </div>
+      </div>
+
+      <div style={styles.sectionLabel}>MAIN MENU</div>
+
+      <nav>
+        {menuItems.map((item) => {
+          const active = activePage === item.id;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                onNavigate(item.id);
+                if (onClose) onClose();
+              }}
+              style={{
+                ...styles.menuItem,
+                ...(active ? styles.activeItem : {}),
+              }}
+            >
+              <span style={styles.icon}>{item.icon}</span>
+              <span>{item.label}</span>
+              {active && <span style={styles.activeMark} />}
+            </button>
+          );
+        })}
+      </nav>
+
+      <div style={styles.sidebarBottom}>
+        <div style={styles.version}>MRTMS v1.0</div>
+        <div style={styles.department}>Molding Department</div>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    minHeight: "100%",
+    padding: "22px 14px",
+    boxSizing: "border-box",
+    color: "#fff",
+  },
+  brand: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "4px 8px 28px",
+    borderBottom: "1px solid #2c4158",
+    marginBottom: 25,
+  },
+  logo: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    background: "#079b9b",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 23,
+    fontWeight: 700,
+  },
+  brandName: { margin: 0, fontSize: 19, letterSpacing: 1 },
+  brandSub: { margin: "4px 0 0", color: "#aab9c9", fontSize: 10 },
+  sectionLabel: {
+    color: "#8da0b4",
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: 1,
+    padding: "0 12px 12px",
+  },
+  menuItem: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: 13,
+    border: "none",
+    background: "transparent",
+    color: "#c4d0dc",
+    padding: "13px 12px",
+    marginBottom: 5,
+    borderRadius: 7,
+    fontSize: 13,
+    textAlign: "left",
+    cursor: "pointer",
+    position: "relative",
+  },
+  activeItem: {
+    background: "#079b9b",
+    color: "#fff",
+    fontWeight: 600,
+  },
+  icon: { width: 20, fontSize: 17, textAlign: "center" },
+  activeMark: {
+    position: "absolute",
+    right: 10,
+    width: 5,
+    height: 5,
+    borderRadius: "50%",
+    background: "#fff",
+  },
+  sidebarBottom: {
+    marginTop: "auto",
+    borderTop: "1px solid #2c4158",
+    padding: "18px 10px 0",
+  },
+  version: { color: "#8da0b4", fontSize: 10 },
+  department: { color: "#c4d0dc", fontSize: 11, marginTop: 6 },
+};
+
+
+4. src/components/layout/Header.jsx
+This creates the top header with the mobile menu button, search field, notifications and user profile.
+import React from "react";
+
+export default function Header({ onMenuClick }) {
+  return (
+    <header style={styles.header}>
+      <div style={styles.left}>
+        <button
+          type="button"
+          onClick={onMenuClick}
+          style={styles.menuButton}
+          aria-label="Toggle navigation"
+        >
+          ☰
+        </button>
+
+        <div>
+          <h3 style={styles.title}>Mold Tracking System</h3>
+          <p style={styles.subtitle}>Molding Department Workspace</p>
+        </div>
+      </div>
+
+      <div style={styles.right}>
+        <input
+          type="search"
+          placeholder="Search mold, customer..."
+          style={styles.search}
+        />
+
+        <button type="button" style={styles.notification} aria-label="Notifications">
+          ♧
+          <span style={styles.notificationDot} />
+        </button>
+
+        <div style={styles.profile}>
+          <div style={styles.avatar}>A</div>
+          <div style={styles.userInfo}>
+            <strong style={styles.userName}>Admin User</strong>
+            <span style={styles.userRole}>Molding Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+const styles = {
+  header: {
+    height: 72,
+    minHeight: 72,
+    background: "#fff",
+    borderBottom: "1px solid #e8edf3",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "0 25px",
+    gap: 20,
+    boxSizing: "border-box",
+  },
+  left: { display: "flex", alignItems: "center", gap: 15 },
+  menuButton: {
+    border: "none",
+    background: "#f1f5f9",
+    borderRadius: 7,
+    padding: "8px 11px",
+    fontSize: 19,
+    cursor: "pointer",
+    color: "#334155",
+  },
+  title: { margin: 0, color: "#172b4d", fontSize: 16 },
+  subtitle: { margin: "4px 0 0", color: "#94a3b8", fontSize: 11 },
+  right: { display: "flex", alignItems: "center", gap: 20 },
+  search: {
+    width: 220,
+    maxWidth: "30vw",
+    padding: "10px 13px",
+    border: "1px solid #e2e8f0",
+    borderRadius: 7,
+    outline: "none",
+    fontSize: 12,
+  },
+  notification: {
+    border: "none",
+    background: "transparent",
+    fontSize: 21,
+    cursor: "pointer",
+    position: "relative",
+    color: "#475569",
+  },
+  notificationDot: {
+    position: "absolute",
+    width: 7,
+    height: 7,
+    background: "#ef4444",
+    borderRadius: "50%",
+    top: 1,
+    right: 0,
+  },
+  profile: { display: "flex", alignItems: "center", gap: 10 },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: "50%",
+    background: "#dff5f3",
+    color: "#078b88",
+    display: "grid",
+    placeItems: "center",
+    fontWeight: 700,
+  },
+  userInfo: { display: "flex", flexDirection: "column", gap: 3 },
+  userName: { fontSize: 12, color: "#334155" },
+  userRole: { fontSize: 10, color: "#94a3b8" },
+};
+
+
+5. Check src/main.jsx
+Make sure your main.jsx imports App and renders it only once. It should look similar to this:
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+
+import "./assets/styles/variables.css";
+import "./assets/styles/global.css";
+import "./assets/styles/utilities.css";
+import "./assets/styles/components.css";
+
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
