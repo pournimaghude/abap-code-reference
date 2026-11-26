@@ -1,98 +1,773 @@
-import React from "react";
+1. Replace src/pages/MoldRegister.jsx
+Copy and replace the entire file with this code. I've kept your existing search, filters, Add Mold, Edit Mold, duplicate validation and summary cards. The main change is that the View button now opens the separate details page.
+
+import React, { useMemo, useState } from "react";
+import { initialMolds } from "../data/mockData";
+import MoldForm from "../components/mold/MoldForm";
+
+export default function MoldRegister({ onViewMold }) {
+  const [molds, setMolds] = useState(initialMolds);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [groupFilter, setGroupFilter] = useState("All");
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingMold, setEditingMold] = useState(null);
+
+  const filteredMolds = useMemo(() => {
+    return molds.filter((mold) => {
+      const searchText = search.toLowerCase();
+
+      const matchesSearch =
+        mold.moldNo.toLowerCase().includes(searchText) ||
+        mold.customer.toLowerCase().includes(searchText) ||
+        mold.model.toLowerCase().includes(searchText);
+
+      const matchesStatus =
+        statusFilter === "All" || mold.status === statusFilter;
+
+      const matchesGroup =
+        groupFilter === "All" || mold.group === groupFilter;
+
+      return matchesSearch && matchesStatus && matchesGroup;
+    });
+  }, [molds, search, statusFilter, groupFilter]);
+
+  const openAddForm = () => {
+    setEditingMold(null);
+    setShowForm(true);
+  };
+
+  const openEditForm = (mold) => {
+    setEditingMold(mold);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingMold(null);
+  };
+
+  const handleSaveMold = (formData) => {
+    const duplicate = molds.some(
+      (mold) =>
+        mold.moldNo.toLowerCase() === formData.moldNo.toLowerCase() &&
+        mold.id !== editingMold?.id
+    );
+
+    if (duplicate) {
+      window.alert("This Mold Number already exists.");
+      return;
+    }
+
+    if (editingMold) {
+      setMolds((previous) =>
+        previous.map((mold) =>
+          mold.id === editingMold.id
+            ? { ...formData, id: editingMold.id }
+            : mold
+        )
+      );
+    } else {
+      setMolds((previous) => [
+        ...previous,
+        { ...formData, id: Date.now() },
+      ]);
+    }
+
+    closeForm();
+  };
+
+  const activeCount = molds.filter(
+    (m) => m.status === "Active"
+  ).length;
+
+  const pendingCount = molds.filter(
+    (m) => m.status === "Pending"
+  ).length;
+
+  const maintenanceCount = molds.filter(
+    (m) => m.status === "Under Maintenance"
+  ).length;
+
+  return (
+    <div className="mold-register-page">
+      <div className="mold-register-heading">
+        <div>
+          <h2>Mold Register</h2>
+          <p>View and manage all registered molds.</p>
+        </div>
+
+        <button className="mold-btn-primary" onClick={openAddForm}>
+          + Add Mold
+        </button>
+      </div>
+
+      <div className="mold-summary-grid">
+        <div className="mold-summary-card">
+          <span>Total Molds</span>
+          <strong>{molds.length}</strong>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Active Molds</span>
+          <strong>{activeCount}</strong>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Pending Molds</span>
+          <strong>{pendingCount}</strong>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Under Maintenance</span>
+          <strong>{maintenanceCount}</strong>
+        </div>
+      </div>
+
+      <section className="mold-register-panel">
+        <div className="mold-register-panel-heading">
+          <div>
+            <h3>All Mold Records</h3>
+            <p>{filteredMolds.length} records found</p>
+          </div>
+        </div>
+
+        <div className="mold-register-filters">
+          <input
+            type="search"
+            placeholder="Search mold number, customer or model..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Under Maintenance">Under Maintenance</option>
+          </select>
+
+          <select
+            value={groupFilter}
+            onChange={(event) => setGroupFilter(event.target.value)}
+          >
+            <option value="All">All Groups</option>
+            <option value="Automotive">Automotive</option>
+            <option value="Industrial">Industrial</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div className="mold-table-wrapper">
+          <table className="mold-register-table">
+            <thead>
+              <tr>
+                <th>Mold Number</th>
+                <th>Customer</th>
+                <th>Model</th>
+                <th>Group</th>
+                <th>Count</th>
+                <th>Subsidiary</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredMolds.length > 0 ? (
+                filteredMolds.map((mold) => (
+                  <tr key={mold.id}>
+                    <td>
+                      <strong>{mold.moldNo}</strong>
+                    </td>
+                    <td>{mold.customer}</td>
+                    <td>{mold.model}</td>
+                    <td>{mold.group || "-"}</td>
+                    <td>{mold.count}</td>
+                    <td>{mold.subsidiary || "-"}</td>
+                    <td>
+                      <span
+                        className={`mold-status ${mold.status
+                          .toLowerCase()
+                          .replaceAll(" ", "-")}`}
+                      >
+                        {mold.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="mold-row-actions">
+                        <button
+                          className="mold-action-view"
+                          onClick={() => onViewMold(mold)}
+                        >
+                          View
+                        </button>
+
+                        <button
+                          className="mold-action-edit"
+                          onClick={() => openEditForm(mold)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="mold-empty-row">
+                    No mold records found. Try changing your search or filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {showForm && (
+        <div className="mold-modal-overlay">
+          <div className="mold-modal">
+            <div className="mold-modal-heading">
+              <div>
+                <h3>
+                  {editingMold ? "Edit Mold" : "Register New Mold"}
+                </h3>
+                <p>
+                  {editingMold
+                    ? "Update the mold information."
+                    : "Enter the basic mold information below."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="mold-modal-close"
+                onClick={closeForm}
+                aria-label="Close form"
+              >
+                ×
+              </button>
+            </div>
+
+            <MoldForm
+              key={editingMold ? editingMold.id : "new-mold"}
+              initialData={editingMold}
+              onSave={handleSaveMold}
+              onCancel={closeForm}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+Notice that viewingMold has been removed. You no longer need the old Mold Details popup because the new page will display those details.
+2. Create src/pages/MoldDetailsPage.jsx
+Create this new file inside your pages folder and paste the following code.
+
+It includes five sections:
+- Overview
+- Trial History
+- Customer Feedback
+- Department Tasks
+- Movement History
+For now, the overview displays your actual selected mold information. The other sections show placeholders until we connect their mock data and workflow.
+
+import React, { useState } from "react";
+
+const tabs = [
+  "Overview",
+  "Trial History",
+  "Customer Feedback",
+  "Department Tasks",
+  "Movement History",
+];
 
 export default function MoldDetailsPage({ mold, onBack }) {
+  const [activeTab, setActiveTab] = useState("Overview");
+
   if (!mold) {
     return (
       <div className="mold-details-page">
-        <button className="mold-btn-secondary" onClick={onBack}>
-          Back to Mold Register
+        <button className="mold-back-button" onClick={onBack}>
+          ← Back to Mold Register
         </button>
-        <p>No mold selected.</p>
+        <div className="mold-details-empty">
+          <h3>No mold selected</h3>
+          <p>Please select a mold from the Mold Register.</p>
+        </div>
       </div>
     );
   }
 
-  const details = [
+  const overviewItems = [
     ["Mold Number", mold.moldNo],
     ["Customer", mold.customer],
     ["Model", mold.model],
     ["Group", mold.group || "-"],
-    ["Count", mold.count],
+    ["Count", mold.count ?? "-"],
     ["Subsidiary", mold.subsidiary || "-"],
-    ["Status", mold.status],
+    ["Status", mold.status || "-"],
   ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "Overview":
+        return (
+          <div className="mold-overview-section">
+            <div className="mold-details-section-heading">
+              <div>
+                <h3>Basic Mold Information</h3>
+                <p>General information about this registered mold.</p>
+              </div>
+            </div>
+
+            <div className="mold-details-info-grid">
+              {overviewItems.map(([label, value]) => (
+                <div className="mold-details-info-card" key={label}>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "Trial History":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">01</div>
+            <h3>Trial History</h3>
+            <p>
+              All trials for this mold will appear here, including T1, T2,
+              T3 and later trials, with trial dates, results and remarks.
+            </p>
+            <span>Trial history module — to be implemented</span>
+          </div>
+        );
+
+      case "Customer Feedback":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">02</div>
+            <h3>Customer Feedback History</h3>
+            <p>
+              Customer feedback, received dates, molding decisions and
+              modification cycles will be recorded here.
+            </p>
+            <span>Feedback history module — to be implemented</span>
+          </div>
+        );
+
+      case "Department Tasks":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">03</div>
+            <h3>Department Work History</h3>
+            <p>
+              Assigned departments, task dates, completion status, remarks
+              and time taken by each department will appear here.
+            </p>
+            <span>Department task module — to be implemented</span>
+          </div>
+        );
+
+      case "Movement History":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">04</div>
+            <h3>Mold Movement History</h3>
+            <p>
+              The complete movement and handover history of this mold
+              between Molding and other departments will appear here.
+            </p>
+            <span>Movement history module — to be implemented</span>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="mold-details-page">
-      <div className="mold-details-page-heading">
-        <div>
-          <button className="mold-back-button" onClick={onBack}>
-            ← Back to Mold Register
-          </button>
+      <div className="mold-details-topbar">
+        <button className="mold-back-button" onClick={onBack}>
+          ← Back to Mold Register
+        </button>
 
-          <h2>{mold.moldNo}</h2>
-          <p>Complete mold information and lifecycle history.</p>
-        </div>
-
-        <span
-          className={`mold-status ${mold.status
-            .toLowerCase()
-            .replaceAll(" ", "-")}`}
-        >
-          {mold.status}
+        <span className="mold-details-breadcrumb">
+          Mold Register / Mold Details
         </span>
       </div>
 
-      <section className="mold-details-section">
-        <h3>Basic Information</h3>
-
-        <div className="mold-details-grid">
-          {details.map(([label, value]) => (
-            <div key={label}>
-              <span>{label}</span>
-              <strong>{value}</strong>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mold-details-section">
-        <h3>Mold Lifecycle</h3>
-
-        <div className="mold-history-placeholder">
-          <div className="mold-history-icon">01</div>
-          <div>
-            <strong>Trial History</strong>
-            <p>Trial records will be displayed here.</p>
-          </div>
+      <div className="mold-details-title">
+        <div>
+          <span className="mold-details-eyebrow">MOLD INFORMATION</span>
+          <h2>{mold.moldNo}</h2>
+          <p>
+            {mold.customer} · {mold.model}
+          </p>
         </div>
 
-        <div className="mold-history-placeholder">
-          <div className="mold-history-icon">02</div>
-          <div>
-            <strong>Customer Feedback</strong>
-            <p>Customer feedback cycles will be displayed here.</p>
-          </div>
-        </div>
+        <span
+          className={`mold-status ${String(mold.status || "")
+            .toLowerCase()
+            .replaceAll(" ", "-")}`}
+        >
+          {mold.status || "Unknown"}
+        </span>
+      </div>
 
-        <div className="mold-history-placeholder">
-          <div className="mold-history-icon">03</div>
-          <div>
-            <strong>Department Work History</strong>
-            <p>Department assignments and completion dates will be displayed here.</p>
-          </div>
-        </div>
+      <div className="mold-details-tabs">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={
+              activeTab === tab
+                ? "mold-details-tab active"
+                : "mold-details-tab"
+            }
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
 
-        <div className="mold-history-placeholder">
-          <div className="mold-history-icon">04</div>
-          <div>
-            <strong>Mold Movement History</strong>
-            <p>Mold handovers and movement records will be displayed here.</p>
-          </div>
-        </div>
+      <section className="mold-details-content">
+        {renderTabContent()}
       </section>
     </div>
   );
 }
 
 
+
+3. Update src/App.jsx
+This step is essential. App.jsx controls which page appears. It remembers which mold you selected and passes that mold to MoldDetailsPage.
+
+Replace your current App.jsx with:
+
+import React, { useState } from "react";
+
+import AppLayout from "./components/layout/AppLayout";
+
+import Dashboard from "./pages/Dashboard";
+import MoldRegister from "./pages/MoldRegister";
+import MoldDetailsPage from "./pages/MoldDetailsPage";
+
+export default function App() {
+  const [activePage, setActivePage] = useState("dashboard");
+  const [selectedMold, setSelectedMold] = useState(null);
+
+  const handleNavigate = (page) => {
+    setActivePage(page);
+  };
+
+  const handleViewMold = (mold) => {
+    setSelectedMold(mold);
+    setActivePage("mold-details");
+  };
+
+  const renderPage = () => {
+    switch (activePage) {
+      case "dashboard":
+        return <Dashboard onNavigate={handleNavigate} />;
+
+      case "molds":
+        return <MoldRegister onViewMold={handleViewMold} />;
+
+      case "mold-details":
+        return (
+          <MoldDetailsPage
+            mold={selectedMold}
+            onBack={() => setActivePage("molds")}
+          />
+        );
+
+      default:
+        return <Dashboard onNavigate={handleNavigate} />;
+    }
+  };
+
+  return (
+    <AppLayout
+      activePage={activePage}
+      onNavigate={handleNavigate}
+    >
+      {renderPage()}
+    </AppLayout>
+  );
+}
+
+
+
+4. Add CSS for the new details page
+Open src/assets/styles/mold.css.
+
+If the file doesn't exist yet, create it. Paste this CSS into it:
+
+/* =====================================
+   MOLD DETAILS PAGE
+===================================== */
+
+.mold-details-page {
+  width: 100%;
+  min-width: 0;
+  padding: 24px;
+  color: var(--text-primary, #202938);
+}
+
+.mold-details-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mold-back-button {
+  border: 1px solid #dce2ea;
+  background: #ffffff;
+  color: #344054;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mold-back-button:hover {
+  background: #f4f6f9;
+}
+
+.mold-details-breadcrumb {
+  color: #8490a0;
+  font-size: 12px;
+}
+
+.mold-details-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e7ebf0;
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+
+.mold-details-eyebrow {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.mold-details-title h2 {
+  margin: 8px 0 5px;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.mold-details-title p {
+  margin: 0;
+  color: #778397;
+  font-size: 13px;
+}
+
+.mold-details-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 5px 0;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.mold-details-tab {
+  flex-shrink: 0;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #778397;
+  padding: 12px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mold-details-tab:hover {
+  color: #2563eb;
+}
+
+.mold-details-tab.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.mold-details-content {
+  min-height: 320px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e7ebf0;
+  border-radius: 12px;
+}
+
+.mold-details-section-heading {
+  margin-bottom: 22px;
+}
+
+.mold-details-section-heading h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.mold-details-section-heading p {
+  margin: 0;
+  color: #8490a0;
+  font-size: 13px;
+}
+
+.mold-details-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mold-details-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e8edf3;
+  border-radius: 9px;
+  min-width: 0;
+}
+
+.mold-details-info-card span {
+  color: #7b8797;
+  font-size: 12px;
+}
+
+.mold-details-info-card strong {
+  color: #263449;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.mold-history-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 270px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.mold-placeholder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mold-history-placeholder h3 {
+  margin: 0 0 9px;
+  font-size: 18px;
+}
+
+.mold-history-placeholder p {
+  margin: 0 0 15px;
+  color: #778397;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.mold-history-placeholder span {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mold-details-empty {
+  padding: 40px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e7ebf0;
+  border-radius: 12px;
+}
+
+.mold-details-empty p {
+  color: #8490a0;
+  font-size: 13px;
+}
+
+/* =====================================
+   RESPONSIVE DESIGN
+===================================== */
+
+@media (max-width: 900px) {
+  .mold-details-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .mold-details-page {
+    padding: 14px;
+  }
+
+  .mold-details-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mold-details-title {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .mold-details-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mold-details-content {
+    padding: 16px;
+  }
+}
+
+
+
+Make sure the CSS file is imported. Open src/main.jsx and add this import with your other CSS imports:
+import "./assets/styles/mold.css";
+
+
+Do not remove your existing CSS imports.
+5. How the new navigation works
