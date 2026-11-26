@@ -1,202 +1,43 @@
 
-import React from "react";
+/* =================================
+   MRTMS DASHBOARD LAYOUT
+================================= */
 
-import StatCard from "../components/dashboard/StatCard";
-import RecentMolds from "../components/dashboard/RecentMolds";
-import PendingTasks from "../components/dashboard/PendingTasks";
-
-// Temporary dashboard data.
-// Later, this data will come from the backend/database.
-
-const dashboardStats = [
-  {
-    title: "Total Molds",
-    value: 248,
-    icon: "Package",
-    color: "blue",
-    trend: "Registered molds",
-  },
-  {
-    title: "Active Molds",
-    value: 186,
-    icon: "CheckCircle",
-    color: "green",
-    trend: "Currently active",
-  },
-  {
-    title: "Under Maintenance",
-    value: 18,
-    icon: "Wrench",
-    color: "orange",
-    trend: "Maintenance required",
-  },
-  {
-    title: "Pending Activities",
-    value: 32,
-    icon: "Clock",
-    color: "purple",
-    trend: "Awaiting action",
-  },
-];
-
-const recentMolds = [
-  {
-    id: 1,
-    moldCode: "MOLD-001",
-    moldName: "Front Cover Mold",
-    customer: "Customer A",
-    status: "In Progress",
-  },
-  {
-    id: 2,
-    moldCode: "MOLD-002",
-    moldName: "Rear Housing Mold",
-    customer: "Customer B",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    moldCode: "MOLD-003",
-    moldName: "Handle Mold",
-    customer: "Customer C",
-    status: "Completed",
-  },
-  {
-    id: 4,
-    moldCode: "MOLD-004",
-    moldName: "Base Cover Mold",
-    customer: "Customer D",
-    status: "Active",
-  },
-];
-
-const pendingTasks = [
-  {
-    id: 1,
-    title: "Mold modification",
-    moldCode: "MOLD-001",
-    dueDate: "4 days overdue",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    title: "Mold inspection",
-    moldCode: "MOLD-002",
-    dueDate: "2 days overdue",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    title: "Sample checking",
-    moldCode: "MOLD-005",
-    dueDate: "6 days overdue",
-    status: "In Progress",
-  },
-];
-
-export default function Dashboard({ onNavigate }) {
-  return (
-    <div className="dashboard-page">
-
-      {/* Dashboard heading */}
-      <div className="page-header">
-        <div>
-          <h2>Dashboard Overview</h2>
-          <p>
-            Monitor mold activities, trials and department progress.
-          </p>
-        </div>
-      </div>
-
-      {/* KPI cards */}
-      <div className="dashboard-stats-grid">
-        {dashboardStats.map((item) => (
-          <StatCard
-            key={item.title}
-            title={item.title}
-            value={item.value}
-            icon={item.icon}
-            color={item.color}
-            trend={item.trend}
-          />
-        ))}
-      </div>
-
-      {/* Recent molds and pending tasks */}
-      <div className="dashboard-main-grid">
-
-        <RecentMolds
-          molds={recentMolds}
-          onViewAll={() => onNavigate?.("molds")}
-        />
-
-        <PendingTasks tasks={pendingTasks} />
-
-      </div>
-
-    </div>
-  );
+.dashboard-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-
-
-import React, { useState } from "react";
-
-import AppLayout from "./components/layout/AppLayout";
-
-import Dashboard from "./pages/Dashboard";
-import MoldRegister from "./pages/MoldRegister";
-
-// These pages will be connected as we implement each module.
-import TrialManagement from "./pages/TrialManagement";
-import DepartmentTasks from "./pages/DepartmentTasks";
-import Reports from "./pages/Reports";
-import UsersRoles from "./pages/UsersRoles";
-import MasterSettings from "./pages/MasterSettings";
-
-export default function App() {
-  const [activePage, setActivePage] = useState("dashboard");
-
-  const handleNavigate = (page) => {
-    setActivePage(page);
-  };
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "dashboard":
-        return <Dashboard onNavigate={handleNavigate} />;
-
-      case "molds":
-        return <MoldRegister />;
-
-      case "trials":
-        return <TrialManagement />;
-
-      case "tasks":
-        return <DepartmentTasks />;
-
-      case "reports":
-        return <Reports />;
-
-      case "users":
-        return <UsersRoles />;
-
-      case "settings":
-        return <MasterSettings />;
-
-      default:
-        return <Dashboard onNavigate={handleNavigate} />;
-    }
-  };
-
-  return (
-    <AppLayout
-      activePage={activePage}
-      onNavigate={handleNavigate}
-    >
-      {renderPage()}
-    </AppLayout>
-  );
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
 }
 
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+}
 
+.dashboard-page > * {
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-stats-grid,
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
