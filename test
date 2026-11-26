@@ -1,93 +1,281 @@
-Perfect! Now I can see your complete MoldRegister.jsx. Your existing code is correct. We only need to make three small changes to connect it to the new Mold Details page.
 
-I'll show you exactly what to change. Don't replace the entire file.
-Step 1. Change the component declaration
-At the top of your file, find:
-export default function MoldRegister() {
+import React, { useMemo, useState } from "react";
+import { initialMolds } from "../data/mockData";
+import MoldForm from "../components/mold/MoldForm";
 
-
-Replace it with:
 export default function MoldRegister({ onViewMold }) {
+  const [molds, setMolds] = useState(initialMolds);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [groupFilter, setGroupFilter] = useState("All");
 
+  const [showForm, setShowForm] = useState(false);
+  const [editingMold, setEditingMold] = useState(null);
 
-This allows App.jsx to send the selected mold to this page.
-Step 2. Remove the old View popup state
-Find this line:
-const [viewingMold, setViewingMold] = useState(null);
+  // Filter molds
+  const filteredMolds = useMemo(() => {
+    return molds.filter((mold) => {
+      const searchText = search.toLowerCase();
 
+      const matchesSearch =
+        String(mold.moldNo || "").toLowerCase().includes(searchText) ||
+        String(mold.customer || "").toLowerCase().includes(searchText) ||
+        String(mold.model || "").toLowerCase().includes(searchText);
 
-Delete only this line.
+      const matchesStatus =
+        statusFilter === "All" || mold.status === statusFilter;
 
-Keep these two states:
-const [showForm, setShowForm] = useState(false);
-const [editingMold, setEditingMold] = useState(null);
+      const matchesGroup =
+        groupFilter === "All" || mold.group === groupFilter;
 
+      return matchesSearch && matchesStatus && matchesGroup;
+    });
+  }, [molds, search, statusFilter, groupFilter]);
 
-Step 3. Change the View button
-Find this existing code in your table:
-<button
-  className="mold-action-view"
-  onClick={() => setViewingMold(mold)}
->
-  View
-</button>
+  // Summary counts
+  const totalMolds = molds.length;
 
+  const activeMolds = molds.filter(
+    (mold) => mold.status === "Active"
+  ).length;
 
-Replace it with:
-<button
-  className="mold-action-view"
-  onClick={() => onViewMold(mold)}
->
-  View
-</button>
+  const maintenanceMolds = molds.filter(
+    (mold) => mold.status === "Under Maintenance"
+  ).length;
 
+  const inactiveMolds = molds.filter(
+    (mold) => mold.status === "Inactive"
+  ).length;
 
-Now clicking View will open the dedicated Mold Details page instead of the popup.
-Step 4. Remove the old Mold Details popup
-At the bottom of your return JSX, find this entire section:
-{viewingMold && (
-  <div
-    className="mold-modal-overlay"
-    onClick={() => setViewingMold(null)}
-  >
-    ...
-  </div>
-)}
+  // Open Add Mold form
+  const openAddForm = () => {
+    setEditingMold(null);
+    setShowForm(true);
+  };
 
+  // Open Edit Mold form
+  const openEditForm = (mold) => {
+    setEditingMold(mold);
+    setShowForm(true);
+  };
 
-Delete the entire {viewingMold && (...)} section, including its opening and closing parts.
+  // Save new or edited mold
+  const handleSaveMold = (formData) => {
+    const duplicateMold = molds.some(
+      (mold) =>
+        String(mold.moldNo).trim().toLowerCase() ===
+          String(formData.moldNo).trim().toLowerCase() &&
+        mold.id !== editingMold?.id
+    );
 
-Keep the {showForm && (...)} section. That is your Add/Edit Mold form, and we still need it.
+    if (duplicateMold) {
+      alert("This Mold Number already exists.");
+      return;
+    }
 
-Your component should finish like this:
+    if (editingMold) {
+      setMolds((previousMolds) =>
+        previousMolds.map((mold) =>
+          mold.id === editingMold.id
+            ? { ...mold, ...formData }
+            : mold
+        )
+      );
+    } else {
+      const newMold = {
+        ...formData,
+        id: Date.now(),
+      };
+
+      setMolds((previousMolds) => [...previousMolds, newMold]);
+    }
+
+    setShowForm(false);
+    setEditingMold(null);
+  };
+
+  return (
+    <div className="mold-register-page">
+      {/* Page Heading */}
+      <div className="mold-register-heading">
+        <div>
+          <h1>Mold Register</h1>
+          <p>Manage and monitor all registered molds.</p>
+        </div>
+
+        <button
+          className="primary-button"
+          onClick={openAddForm}
+        >
+          + Add New Mold
+        </button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="mold-summary-grid">
+        <div className="mold-summary-card">
+          <span>Total Molds</span>
+          <h2>{totalMolds}</h2>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Active Molds</span>
+          <h2>{activeMolds}</h2>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Under Maintenance</span>
+          <h2>{maintenanceMolds}</h2>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Inactive Molds</span>
+          <h2>{inactiveMolds}</h2>
+        </div>
+      </div>
+
+      {/* Mold Register Table */}
+      <div className="mold-register-panel">
+        <div className="mold-register-panel-heading">
+          <div>
+            <h2>All Molds</h2>
+            <p>Search, filter and manage mold records.</p>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="mold-register-filters">
+          <input
+            type="text"
+            placeholder="Search Mold No., Customer or Model..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Under Maintenance">Under Maintenance</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+
+          <select
+            value={groupFilter}
+            onChange={(event) => setGroupFilter(event.target.value)}
+          >
+            <option value="All">All Groups</option>
+            {[...new Set(molds.map((mold) => mold.group).filter(Boolean))].map(
+              (group) => (
+                <option key={group} value={group}>
+                  {group}
+                </option>
+              )
+            )}
+          </select>
+        </div>
+
+        {/* Table */}
+        <div className="mold-table-wrapper">
+          <table className="mold-register-table">
+            <thead>
+              <tr>
+                <th>Mold No.</th>
+                <th>Customer</th>
+                <th>Model</th>
+                <th>Group</th>
+                <th>Count</th>
+                <th>Subsidiary</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredMolds.length > 0 ? (
+                filteredMolds.map((mold) => (
+                  <tr key={mold.id}>
+                    <td>{mold.moldNo}</td>
+                    <td>{mold.customer}</td>
+                    <td>{mold.model}</td>
+                    <td>{mold.group}</td>
+                    <td>{mold.count}</td>
+                    <td>{mold.subsidiary}</td>
+                    <td>
+                      <span
+                        className={`mold-status ${
+                          mold.status === "Active"
+                            ? "active"
+                            : mold.status === "Under Maintenance"
+                            ? "maintenance"
+                            : "inactive"
+                        }`}
+                      >
+                        {mold.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="mold-row-actions">
+                        <button
+                          className="mold-action-view"
+                          onClick={() => onViewMold?.(mold)}
+                        >
+                          View
+                        </button>
+
+                        <button
+                          className="mold-action-edit"
+                          onClick={() => openEditForm(mold)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="mold-empty-state">
+                    No molds found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mold-table-footer">
+          Showing {filteredMolds.length} of {totalMolds} molds
+        </div>
+      </div>
+
+      {/* Add / Edit Mold Modal */}
       {showForm && (
         <div className="mold-modal-overlay">
           <div className="mold-modal">
             <div className="mold-modal-heading">
-              <div>
-                <h3>{editingMold ? "Edit Mold" : "Register New Mold"}</h3>
-                <p>
-                  {editingMold
-                    ? "Update the mold information."
-                    : "Enter the basic mold information below."}
-                </p>
-              </div>
+              <h2>{editingMold ? "Edit Mold" : "Add New Mold"}</h2>
 
               <button
-                type="button"
                 className="mold-modal-close"
-                onClick={closeForm}
-                aria-label="Close form"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingMold(null);
+                }}
               >
                 ×
               </button>
             </div>
 
             <MoldForm
-              key={editingMold ? editingMold.id : "new-mold"}
               initialData={editingMold}
               onSave={handleSaveMold}
-              onCancel={closeForm}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingMold(null);
+              }}
             />
           </div>
         </div>
@@ -95,55 +283,3 @@ Your component should finish like this:
     </div>
   );
 }
-
-
-Step 5. Check your App.jsx
-Make sure these imports exist:
-import MoldRegister from "./pages/MoldRegister";
-import MoldDetailsPage from "./pages/MoldDetailsPage";
-
-
-And make sure the following state and function exist:
-const [selectedMold, setSelectedMold] = useState(null);
-
-const handleViewMold = (mold) => {
-  setSelectedMold(mold);
-  setActivePage("mold-details");
-};
-
-
-Your switch statement must include:
-case "molds":
-  return <MoldRegister onViewMold={handleViewMold} />;
-
-case "mold-details":
-  return (
-    <MoldDetailsPage
-      mold={selectedMold}
-      onBack={() => setActivePage("molds")}
-    />
-  );
-
-
-Step 6. Your work checklist
-Implementation progress
-0/6 completed
-
-
-
-[ ] Changed MoldRegister component declaration
-[ ] Removed viewingMold state
-[ ] Changed View button click handler
-[ ] Removed old Mold Details popup
-[ ] Created MoldDetailsPage.jsx
-[ ] Connected MoldDetailsPage in App.jsx
-
-Expected result:
-- Dashboard continues working.
-- Mold Register continues working.
-- Add Mold and Edit Mold continue working.
-- View opens a separate Mold Details page.
-- Back returns to Mold Register.
-One important limitation for now: your mold records are still held in MoldRegister component state. When you navigate away and come back, newly added or edited records may reset. We'll address shared state and permanent database storage in a later stage.
-
-Complete these changes and test View. Then we'll build the actual Trial History section inside Mold Details.
