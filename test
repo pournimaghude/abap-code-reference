@@ -1,585 +1,617 @@
-1. Create src/pages/MoldRegister.jsx
-Create a new folder named pages inside src, then create MoldRegister.jsx.
+App.jsx - 
 
-Paste this complete code:
-import React, { useMemo, useState } from "react";
+import React, { useState } from 'react'
+import AppLayout from './components/layout/AppLayout'
 
-const initialMolds = [
-  { id: 1, moldNo: "MOLD-001", customer: "Customer A", model: "Model X", group: "Group A", count: 1, status: "Active" },
-  { id: 2, moldNo: "MOLD-002", customer: "Customer B", model: "Model Y", group: "Group B", count: 1, status: "Under Maintenance" },
-  { id: 3, moldNo: "MOLD-003", customer: "Customer C", model: "Model Z", group: "Group A", count: 2, status: "Active" },
-  { id: 4, moldNo: "MOLD-004", customer: "Customer D", model: "Model P", group: "Group C", count: 1, status: "Inactive" },
-  { id: 5, moldNo: "MOLD-005", customer: "Customer E", model: "Model Q", group: "Group B", count: 1, status: "Active" },
-];
+const menuPages = {
+  dashboard: 'Dashboard',
+  molds: 'Mold Register',
+  trials: 'Trial Management',
+  tasks: 'Task & Workflow',
+  reports: 'Reports',
+  users: 'Users & Roles',
+  settings: 'Master Settings'
+}
 
-const emptyForm = {
-  moldNo: "",
-  customer: "",
-  model: "",
-  group: "",
-  count: "1",
-  status: "Active",
-};
+const dashboardStats = [
+  { title: 'Total Molds', value: '248', change: 'Registered molds', icon: '▣' },
+  {
+    title: 'Active Molds',
+    value: '186',
+    change: 'Currently active',
+    icon: '◉'
+  },
+  {
+    title: 'Under Maintenance',
+    value: '18',
+    change: 'Maintenance required',
+    icon: '⚙'
+  },
+  {
+    title: 'Pending Activities',
+    value: '32',
+    change: 'Awaiting action',
+    icon: '◷'
+  }
+]
 
-export default function MoldRegister() {
-  const [molds, setMolds] = useState(initialMolds);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [showForm, setShowForm] = useState(false);
-  const [selectedMold, setSelectedMold] = useState(null);
-  const [form, setForm] = useState(emptyForm);
-  const [error, setError] = useState("");
+const recentMolds = [
+  {
+    moldNo: 'MOLD-001',
+    customer: 'Customer A',
+    model: 'Model X',
+    trial: 'T3',
+    status: 'In Progress'
+  },
+  {
+    moldNo: 'MOLD-002',
+    customer: 'Customer B',
+    model: 'Model Y',
+    trial: 'T2',
+    status: 'Pending'
+  },
+  {
+    moldNo: 'MOLD-003',
+    customer: 'Customer C',
+    model: 'Model Z',
+    trial: 'T4',
+    status: 'Completed'
+  },
+  {
+    moldNo: 'MOLD-004',
+    customer: 'Customer D',
+    model: 'Model P',
+    trial: 'T1',
+    status: 'Active'
+  }
+]
 
-  const filteredMolds = useMemo(() => {
-    return molds.filter((mold) => {
-      const searchText = search.toLowerCase();
+const pendingTasks = [
+  {
+    mold: 'MOLD-001',
+    department: 'Tool Room',
+    task: 'Mold modification',
+    days: 4
+  },
+  {
+    mold: 'MOLD-002',
+    department: 'Maintenance',
+    task: 'Mold inspection',
+    days: 2
+  },
+  { mold: 'MOLD-005', department: 'Quality', task: 'Sample checking', days: 6 }
+]
 
-      const matchesSearch =
-        mold.moldNo.toLowerCase().includes(searchText) ||
-        mold.customer.toLowerCase().includes(searchText) ||
-        mold.model.toLowerCase().includes(searchText) ||
-        mold.group.toLowerCase().includes(searchText);
-
-      const matchesStatus =
-        statusFilter === "All" || mold.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [molds, search, statusFilter]);
-
-  const updateForm = (event) => {
-    const { name, value } = event.target;
-    setForm((previous) => ({ ...previous, [name]: value }));
-  };
-
-  const handleAddMold = (event) => {
-    event.preventDefault();
-    setError("");
-
-    if (!form.moldNo.trim() || !form.customer.trim() || !form.model.trim()) {
-      setError("Please enter Mold No., Customer and Model.");
-      return;
-    }
-
-    const duplicate = molds.some(
-      (mold) => mold.moldNo.toLowerCase() === form.moldNo.trim().toLowerCase()
-    );
-
-    if (duplicate) {
-      setError("This Mold No. already exists.");
-      return;
-    }
-
-    const newMold = {
-      id: Date.now(),
-      ...form,
-      moldNo: form.moldNo.trim(),
-      customer: form.customer.trim(),
-      model: form.model.trim(),
-      group: form.group.trim() || "Not Assigned",
-      count: Number(form.count) || 1,
-    };
-
-    setMolds((previous) => [newMold, ...previous]);
-    setForm(emptyForm);
-    setShowForm(false);
-  };
-
-  const closeForm = () => {
-    setShowForm(false);
-    setForm(emptyForm);
-    setError("");
-  };
-
+function Dashboard () {
   return (
     <div>
-      <div style={styles.pageHeader}>
+      <div style={styles.welcome}>
         <div>
-          <h2 style={styles.title}>Mold Register</h2>
+          <h2 style={styles.heading}>Dashboard Overview</h2>
           <p style={styles.subtitle}>
-            Register, search and manage all mold records.
+            Monitor mold activities, trials and department progress.
           </p>
         </div>
-
-        <button
-          type="button"
-          style={styles.primaryButton}
-          onClick={() => setShowForm(true)}
-        >
-          + Add New Mold
-        </button>
       </div>
 
-      <div style={styles.summaryGrid}>
-        <SummaryCard label="Total Molds" value={molds.length} />
-        <SummaryCard
-          label="Active Molds"
-          value={molds.filter((m) => m.status === "Active").length}
-        />
-        <SummaryCard
-          label="Under Maintenance"
-          value={molds.filter((m) => m.status === "Under Maintenance").length}
-        />
-        <SummaryCard
-          label="Inactive Molds"
-          value={molds.filter((m) => m.status === "Inactive").length}
-        />
+      <div style={styles.statsGrid}>
+        {dashboardStats.map(item => (
+          <div key={item.title} style={styles.statCard}>
+            <div style={styles.statTop}>
+              <span style={styles.statIcon}>{item.icon}</span>
+              <span style={styles.statLabel}>{item.title}</span>
+            </div>
+            <h2 style={styles.statValue}>{item.value}</h2>
+            <p style={styles.statChange}>{item.change}</p>
+          </div>
+        ))}
       </div>
 
-      <section style={styles.panel}>
-        <div style={styles.toolbar}>
-          <div>
-            <h3 style={styles.panelTitle}>All Mold Records</h3>
-            <p style={styles.resultText}>
-              Showing {filteredMolds.length} of {molds.length} molds
-            </p>
+      <div style={styles.contentGrid}>
+        <section style={styles.panel}>
+          <div style={styles.panelHeader}>
+            <h3 style={styles.panelTitle}>Recent Mold Records</h3>
+            <span style={styles.viewAll}>View All</span>
           </div>
 
-          <div style={styles.filters}>
-            <input
-              type="search"
-              placeholder="Search mold, customer, model..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              style={styles.search}
-            />
-
-            <select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Status</option>
-              <option value="Active">Active</option>
-              <option value="Under Maintenance">Under Maintenance</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
-
-        <div style={{ overflowX: "auto" }}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Mold No.</th>
-                <th style={styles.th}>Customer</th>
-                <th style={styles.th}>Model</th>
-                <th style={styles.th}>Group</th>
-                <th style={styles.th}>Count</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredMolds.map((mold) => (
-                <tr key={mold.id}>
-                  <td style={styles.td}>
-                    <strong style={{ color: "#078f91" }}>{mold.moldNo}</strong>
-                  </td>
-                  <td style={styles.td}>{mold.customer}</td>
-                  <td style={styles.td}>{mold.model}</td>
-                  <td style={styles.td}>{mold.group}</td>
-                  <td style={styles.td}>{mold.count}</td>
-                  <td style={styles.td}>
-                    <StatusBadge status={mold.status} />
-                  </td>
-                  <td style={styles.td}>
-                    <button
-                      type="button"
-                      style={styles.viewButton}
-                      onClick={() => setSelectedMold(mold)}
-                    >
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {filteredMolds.length === 0 && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan="7" style={styles.empty}>
-                    No mold records found. Try changing your search or filter.
-                  </td>
+                  <th style={styles.th}>Mold No.</th>
+                  <th style={styles.th}>Customer</th>
+                  <th style={styles.th}>Model</th>
+                  <th style={styles.th}>Trial</th>
+                  <th style={styles.th}>Status</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {showForm && (
-        <div style={styles.backdrop} onMouseDown={closeForm}>
-          <div
-            style={styles.modal}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <div style={styles.modalHeader}>
-              <div>
-                <h3 style={styles.modalTitle}>Add New Mold</h3>
-                <p style={styles.subtitle}>Enter the basic mold information.</p>
-              </div>
-              <button type="button" onClick={closeForm} style={styles.closeButton}>
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={handleAddMold}>
-              <div style={styles.formGrid}>
-                <FormInput label="Mold No. *" name="moldNo" value={form.moldNo} onChange={updateForm} placeholder="e.g. MOLD-006" />
-                <FormInput label="Customer *" name="customer" value={form.customer} onChange={updateForm} placeholder="Enter customer name" />
-                <FormInput label="Model *" name="model" value={form.model} onChange={updateForm} placeholder="Enter model name" />
-                <FormInput label="Group" name="group" value={form.group} onChange={updateForm} placeholder="Enter group" />
-                <FormInput label="Count" name="count" type="number" value={form.count} onChange={updateForm} />
-                <div style={styles.field}>
-                  <label style={styles.label}>Status</label>
-                  <select name="status" value={form.status} onChange={updateForm} style={styles.formControl}>
-                    <option>Active</option>
-                    <option>Under Maintenance</option>
-                    <option>Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              {error && <p style={styles.error}>{error}</p>}
-
-              <div style={styles.formActions}>
-                <button type="button" style={styles.cancelButton} onClick={closeForm}>
-                  Cancel
-                </button>
-                <button type="submit" style={styles.primaryButton}>
-                  Save Mold
-                </button>
-              </div>
-            </form>
+              </thead>
+              <tbody>
+                {recentMolds.map(mold => (
+                  <tr key={mold.moldNo}>
+                    <td style={styles.td}>
+                      <strong>{mold.moldNo}</strong>
+                    </td>
+                    <td style={styles.td}>{mold.customer}</td>
+                    <td style={styles.td}>{mold.model}</td>
+                    <td style={styles.td}>{mold.trial}</td>
+                    <td style={styles.td}>
+                      <span style={statusStyle(mold.status)}>
+                        {mold.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-      )}
+        </section>
 
-      {selectedMold && (
-        <div style={styles.backdrop} onMouseDown={() => setSelectedMold(null)}>
-          <div
-            style={styles.modal}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <div style={styles.modalHeader}>
-              <div>
-                <h3 style={styles.modalTitle}>Mold Details</h3>
-                <p style={styles.subtitle}>{selectedMold.moldNo}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedMold(null)}
-                style={styles.closeButton}
-              >
-                ×
-              </button>
-            </div>
-
-            <div style={styles.detailsGrid}>
-              <Detail label="Mold No." value={selectedMold.moldNo} />
-              <Detail label="Customer" value={selectedMold.customer} />
-              <Detail label="Model" value={selectedMold.model} />
-              <Detail label="Group" value={selectedMold.group} />
-              <Detail label="Count" value={selectedMold.count} />
-              <div>
-                <p style={styles.detailLabel}>Status</p>
-                <StatusBadge status={selectedMold.status} />
-              </div>
-            </div>
-
-            <div style={styles.formActions}>
-              <button
-                type="button"
-                style={styles.primaryButton}
-                onClick={() => setSelectedMold(null)}
-              >
-                Close
-              </button>
-            </div>
+        <section style={styles.panel}>
+          <div style={styles.panelHeader}>
+            <h3 style={styles.panelTitle}>Pending Activities</h3>
+            <span style={styles.viewAll}>View All</span>
           </div>
-        </div>
+
+          {pendingTasks.map((task, index) => (
+            <div key={index} style={styles.taskItem}>
+              <div>
+                <strong style={styles.taskMold}>{task.mold}</strong>
+                <p style={styles.taskDescription}>{task.task}</p>
+                <span style={styles.department}>{task.department}</span>
+              </div>
+              <span style={styles.days}>{task.days} days</span>
+            </div>
+          ))}
+        </section>
+      </div>
+    </div>
+  )
+}
+
+function PlaceholderPage ({ title }) {
+  return (
+    <div style={styles.panel}>
+      <h2 style={styles.heading}>{title}</h2>
+      <p style={styles.subtitle}>
+        This module will be developed in the next frontend setup step.
+      </p>
+    </div>
+  )
+}
+
+export default function App () {
+  const [activePage, setActivePage] = useState('dashboard')
+
+  const handleNavigate = page => {
+    setActivePage(page)
+  }
+
+  return (
+    <AppLayout activePage={activePage} onNavigate={handleNavigate}>
+      {activePage === 'dashboard' ? (
+        <Dashboard />
+      ) : activePage === 'molds' ? (
+        <MoldRegister />
+      ) : (
+        <PlaceholderPage title={menuPages[activePage] || 'Page'} />
       )}
-    </div>
-  );
+    </AppLayout>
+  )
 }
 
-function SummaryCard({ label, value }) {
-  return (
-    <div style={styles.summaryCard}>
-      <p style={styles.summaryLabel}>{label}</p>
-      <h2 style={styles.summaryValue}>{value}</h2>
-    </div>
-  );
-}
-
-function FormInput({ label, name, value, onChange, placeholder, type = "text" }) {
-  return (
-    <div style={styles.field}>
-      <label style={styles.label}>{label}</label>
-      <input
-        name={name}
-        type={type}
-        min={type === "number" ? "1" : undefined}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        style={styles.formControl}
-      />
-    </div>
-  );
-}
-
-function Detail({ label, value }) {
-  return (
-    <div>
-      <p style={styles.detailLabel}>{label}</p>
-      <strong style={styles.detailValue}>{value}</strong>
-    </div>
-  );
-}
-
-function StatusBadge({ status }) {
+function statusStyle (status) {
   const colors = {
-    Active: { background: "#dcfce7", color: "#15803d" },
-    "Under Maintenance": { background: "#fff7ed", color: "#c2410c" },
-    Inactive: { background: "#f1f5f9", color: "#475569" },
-  };
+    'In Progress': { background: '#e0f2fe', color: '#0369a1' },
+    Pending: { background: '#fff7ed', color: '#c2410c' },
+    Completed: { background: '#dcfce7', color: '#15803d' },
+    Active: { background: '#e0e7ff', color: '#4338ca' }
+  }
 
-  return (
-    <span style={{ ...styles.badge, ...colors[status] }}>
-      {status}
-    </span>
-  );
+  return {
+    ...colors[status],
+    padding: '5px 10px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: 600,
+    whiteSpace: 'nowrap'
+  }
 }
 
 const styles = {
-  pageHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 15,
-    flexWrap: "wrap",
-    marginBottom: 22,
+  welcome: { marginBottom: 22 },
+  heading: { margin: 0, fontSize: 22, color: '#172b4d', fontWeight: 700 },
+  subtitle: { marginTop: 7, color: '#718096', fontSize: 13 },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+    gap: 18,
+    marginBottom: 22
   },
-  title: { margin: 0, fontSize: 22, color: "#172b4d" },
-  subtitle: { margin: "7px 0 0", color: "#718096", fontSize: 13 },
-  primaryButton: {
-    border: "none",
-    borderRadius: 7,
-    background: "#079b9b",
-    color: "#fff",
-    padding: "11px 17px",
-    fontWeight: 600,
-    fontSize: 13,
-    cursor: "pointer",
-  },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-    gap: 16,
-    marginBottom: 22,
-  },
-  summaryCard: {
-    background: "#fff",
-    border: "1px solid #e8edf3",
-    borderRadius: 9,
-    padding: "17px 19px",
-  },
-  summaryLabel: { margin: 0, color: "#718096", fontSize: 12 },
-  summaryValue: { margin: "10px 0 0", color: "#172b4d", fontSize: 25 },
-  panel: {
-    background: "#fff",
-    border: "1px solid #e8edf3",
+  statCard: {
+    background: '#fff',
+    border: '1px solid #e8edf3',
     borderRadius: 10,
     padding: 20,
+    minWidth: 0
   },
-  toolbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 15,
-    marginBottom: 20,
+  statTop: { display: 'flex', alignItems: 'center', gap: 10 },
+  statIcon: {
+    background: '#e6f7f7',
+    color: '#079b9b',
+    borderRadius: 8,
+    padding: '8px 10px',
+    fontSize: 18
   },
-  panelTitle: { margin: 0, color: "#172b4d", fontSize: 16 },
-  resultText: { margin: "5px 0 0", color: "#94a3b8", fontSize: 11 },
-  filters: { display: "flex", gap: 10, flexWrap: "wrap" },
-  search: {
-    width: 240,
-    maxWidth: "100%",
-    padding: "10px 12px",
-    border: "1px solid #dce3eb",
-    borderRadius: 6,
-    fontSize: 12,
+  statLabel: { color: '#64748b', fontSize: 13 },
+  statValue: { margin: '15px 0 5px', color: '#172b4d', fontSize: 27 },
+  statChange: { margin: 0, color: '#94a3b8', fontSize: 12 },
+  contentGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1.6fr) minmax(280px, 1fr)',
+    gap: 20,
+    alignItems: 'start'
   },
-  select: {
-    padding: "10px 12px",
-    border: "1px solid #dce3eb",
-    borderRadius: 6,
-    background: "#fff",
-    color: "#475569",
-    fontSize: 12,
+  panel: {
+    background: '#fff',
+    border: '1px solid #e8edf3',
+    borderRadius: 10,
+    padding: 20,
+    minWidth: 0
   },
-  table: { width: "100%", borderCollapse: "collapse", textAlign: "left" },
+  panelHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 18
+  },
+  panelTitle: { margin: 0, fontSize: 16, color: '#172b4d' },
+  viewAll: { color: '#079b9b', fontSize: 12, fontWeight: 600 },
+  table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left' },
   th: {
-    background: "#f8fafc",
-    color: "#64748b",
+    padding: '12px 10px',
+    color: '#718096',
+    background: '#f8fafc',
     fontSize: 12,
-    padding: "13px 12px",
-    whiteSpace: "nowrap",
+    fontWeight: 600,
+    whiteSpace: 'nowrap'
   },
   td: {
-    borderBottom: "1px solid #edf1f5",
-    color: "#475569",
+    padding: '14px 10px',
+    borderBottom: '1px solid #edf1f5',
+    color: '#475569',
     fontSize: 12,
-    padding: "14px 12px",
-    whiteSpace: "nowrap",
+    whiteSpace: 'nowrap'
   },
-  badge: {
-    display: "inline-block",
-    borderRadius: 20,
-    padding: "5px 10px",
-    fontSize: 11,
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  },
-  viewButton: {
-    border: "1px solid #b8e5e3",
-    background: "#effbfa",
-    color: "#078b88",
-    borderRadius: 5,
-    padding: "7px 10px",
-    cursor: "pointer",
-    fontSize: 11,
-    fontWeight: 600,
-  },
-  empty: {
-    textAlign: "center",
-    padding: 35,
-    color: "#94a3b8",
-    fontSize: 13,
-  },
-  backdrop: {
-    position: "fixed",
-    inset: 0,
-    zIndex: 100,
-    background: "rgba(15, 23, 42, 0.55)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 18,
-  },
-  modal: {
-    background: "#fff",
-    borderRadius: 12,
-    padding: 24,
-    width: "100%",
-    maxWidth: 620,
-    maxHeight: "90vh",
-    overflowY: "auto",
-    boxSizing: "border-box",
-  },
-  modalHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 22,
-  },
-  modalTitle: { margin: 0, color: "#172b4d", fontSize: 19 },
-  closeButton: {
-    border: "none",
-    background: "#f1f5f9",
-    borderRadius: 6,
-    width: 30,
-    height: 30,
-    fontSize: 22,
-    color: "#475569",
-    cursor: "pointer",
-  },
-  formGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: 16,
-  },
-  field: { display: "flex", flexDirection: "column", gap: 7 },
-  label: { fontSize: 12, fontWeight: 600, color: "#475569" },
-  formControl: {
-    width: "100%",
-    boxSizing: "border-box",
-    border: "1px solid #dce3eb",
-    borderRadius: 6,
-    padding: "11px 12px",
-    fontSize: 13,
-    color: "#334155",
-    background: "#fff",
-  },
-  error: { color: "#dc2626", fontSize: 12, marginTop: 14 },
-  formActions: {
-    display: "flex",
-    justifyContent: "flex-end",
+  taskItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 10,
-    marginTop: 24,
+    padding: '14px 0',
+    borderBottom: '1px solid #edf1f5'
   },
-  cancelButton: {
-    border: "1px solid #dce3eb",
-    borderRadius: 7,
-    background: "#fff",
-    color: "#475569",
-    padding: "10px 16px",
-    cursor: "pointer",
-  },
-  detailsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: 22,
-  },
-  detailLabel: { margin: "0 0 7px", color: "#94a3b8", fontSize: 11 },
-  detailValue: { color: "#334155", fontSize: 13 },
-};
+  taskMold: { color: '#172b4d', fontSize: 13 },
+  taskDescription: { margin: '5px 0', color: '#64748b', fontSize: 12 },
+  department: { color: '#079b9b', fontSize: 11 },
+  days: {
+    color: '#c2410c',
+    background: '#fff7ed',
+    borderRadius: 6,
+    padding: '6px 8px',
+    fontSize: 11,
+    whiteSpace: 'nowrap'
+  }
+}
+
+// import React, { useState } from 'react';
+
+// import Sidebar from './components/layout/Sidebar';
+// import Header from './components/layout/Header';
+// import Breadcrumb from './components/layout/Breadcrumb';
+// import PageHeader from './components/layout/PageHeader';
+
+// import Button from './components/common/Button';
+// import SearchBar from './components/common/SearchBar';
+// import StatusBadge from './components/common/StatusBadge';
+
+// import StatCard from './components/dashboard/StatCard';
+// import RecentMolds from './components/dashboard/RecentMolds';
+// import PendingTasks from './components/dashboard/PendingTasks';
+
+// const moldRecords = [
+//   {
+//     id: 1,
+//     moldCode: 'MOLD-001',
+//     moldName: 'Front Cover Mold',
+//     partName: 'Front Cover',
+//     machine: 'IMM-250',
+//     status: 'ACTIVE',
+//     location: 'Molding',
+//     updatedAt: '24 Nov 2026'
+//   },
+//   {
+//     id: 2,
+//     moldCode: 'MOLD-002',
+//     moldName: 'Rear Housing Mold',
+//     partName: 'Rear Housing',
+//     machine: 'IMM-350',
+//     status: 'UNDER_TRIAL',
+//     location: 'Trial Room',
+//     updatedAt: '23 Nov 2026'
+//   },
+//   {
+//     id: 3,
+//     moldCode: 'MOLD-003',
+//     moldName: 'Handle Mold',
+//     partName: 'Handle',
+//     machine: 'IMM-180',
+//     status: 'UNDER_MAINTENANCE',
+//     location: 'Maintenance',
+//     updatedAt: '22 Nov 2026'
+//   }
+// ];
+
+// const pendingTasks = [
+//   {
+//     id: 1,
+//     title: 'MOLD-003 - Maintenance inspection',
+//     description: 'Complete the scheduled inspection',
+//     dueDate: 'Today',
+//     priority: 'High'
+//   },
+//   {
+//     id: 2,
+//     title: 'MOLD-002 - Trial approval',
+//     description: 'Trial result awaiting approval',
+//     dueDate: 'Tomorrow',
+//     priority: 'Medium'
+//   },
+//   {
+//     id: 3,
+//     title: 'MOLD-015 - Update mold details',
+//     description: 'Complete missing mold information',
+//     dueDate: '26 Nov 2026',
+//     priority: 'Low'
+//   }
+// ];
+
+// function App() {
+//   const [activePath, setActivePath] = useState('/dashboard');
+//   const [search, setSearch] = useState('');
+//   const [menuOpen, setMenuOpen] = useState(false);
+
+//   const navigation = [
+//     { path: '/dashboard', label: 'Dashboard' },
+//     { path: '/molds', label: 'Mold Register' },
+//     { path: '/trials', label: 'Trial Management' },
+//     { path: '/tasks', label: 'Task & Workflows' },
+//     { path: '/reports', label: 'Reports' },
+//     { path: '/users', label: 'Users' },
+//     { path: '/settings', label: 'Settings' }
+//   ];
+
+//   const activeItem =
+//     navigation.find(item => item.path === activePath);
+
+//   const pageTitle = activeItem?.label || 'Dashboard';
+
+//   const filteredMolds = moldRecords.filter(mold =>
+//     `${mold.moldCode} ${mold.moldName} ${mold.partName}`
+//       .toLowerCase()
+//       .includes(search.toLowerCase())
+//   );
+
+//   const handleNavigate = path => {
+//     setActivePath(path);
+//     setSearch('');
+//     setMenuOpen(false);
+//   };
+
+//   return (
+//     <div className="app-shell">
+
+//       <Sidebar
+//         activePath={activePath}
+//         onNavigate={handleNavigate}
+//       />
+
+//       <div className="app-main">
+
+//         <Header
+//           onMenuClick={() => setMenuOpen(!menuOpen)}
+//           user={{
+//             name: 'Molding Admin',
+//             role: 'Molding Department'
+//           }}
+//         />
+
+//         <main className="page-content">
+
+//           <Breadcrumb
+//             items={['Home', pageTitle]}
+//           />
+
+//           <PageHeader
+//             title={pageTitle}
+//             subtitle={
+//               activePath === '/dashboard'
+//                 ? 'Monitor mold activities and department performance.'
+//                 : `Manage ${pageTitle.toLowerCase()} information.`
+//             }
+//             actions={
+//               activePath === '/dashboard' ? (
+//                 <Button
+//                   variant="primary"
+//                   onClick={() => handleNavigate('/add-mold')}
+//                 >
+//                   + Register New Mold
+//                 </Button>
+//               ) : null
+//             }
+//           />
+
+//           {activePath === '/dashboard' && (
+//             <>
+//               <section className="stats-grid">
+
+//                 <StatCard
+//                   title="Total Molds"
+//                   value="248"
+//                   icon="Package"
+//                   color="blue"
+//                   trend="+12 this month"
+//                 />
+
+//                 <StatCard
+//                   title="Active Molds"
+//                   value="186"
+//                   icon="CheckCircle"
+//                   color="green"
+//                   trend="Currently active"
+//                 />
+
+//                 <StatCard
+//                   title="Under Maintenance"
+//                   value="18"
+//                   icon="Wrench"
+//                   color="orange"
+//                   trend="Needs attention"
+//                 />
+
+//                 <StatCard
+//                   title="Pending Tasks"
+//                   value="12"
+//                   icon="Clock"
+//                   color="red"
+//                   trend="Awaiting action"
+//                 />
+
+//               </section>
+
+//               <section className="dashboard-grid">
+
+//                 <div className="panel dashboard-molds">
+//                   <div className="panel-heading">
+//                     <div>
+//                       <h3>Recent Mold Records</h3>
+//                       <p>Recently updated mold information</p>
+//                     </div>
+
+//                     <Button
+//                       variant="outline"
+//                       size="small"
+//                       onClick={() =>
+//                         handleNavigate('/molds')
+//                       }
+//                     >
+//                       View All
+//                     </Button>
+//                   </div>
+
+//                   <SearchBar
+//                     value={search}
+//                     onChange={setSearch}
+//                     placeholder="Search mold code or name..."
+//                   />
+
+//                   <div className="mold-record-list">
+//                     {filteredMolds.map(mold => (
+//                       <div className="mold-record" key={mold.id}>
+//                         <div className="mold-record-info">
+//                           <strong>{mold.moldCode}</strong>
+//                           <span>{mold.moldName}</span>
+//                           <small>{mold.machine} · {mold.location}</small>
+//                         </div>
+
+//                         <StatusBadge status={mold.status} />
+//                       </div>
+//                     ))}
+
+//                     {filteredMolds.length === 0 && (
+//                       <p className="no-records">
+//                         No matching mold records found.
+//                       </p>
+//                     )}
+//                   </div>
+//                 </div>
+
+//                 <div className="panel dashboard-tasks">
+//                   <PendingTasks tasks={pendingTasks} />
+//                 </div>
+
+//               </section>
+//             </>
+//           )}
+
+//           {activePath === '/molds' && (
+//             <section className="panel">
+//               <div className="panel-heading">
+//                 <div>
+//                   <h3>Mold Register</h3>
+//                   <p>All registered molding tools</p>
+//                 </div>
+
+//                 <Button
+//                   onClick={() => handleNavigate('/add-mold')}
+//                 >
+//                   + Add Mold
+//                 </Button>
+//               </div>
+
+//               <SearchBar
+//                 value={search}
+//                 onChange={setSearch}
+//                 placeholder="Search mold records..."
+//               />
+
+//               <div className="mold-record-list">
+//                 {filteredMolds.map(mold => (
+//                   <div className="mold-record" key={mold.id}>
+//                     <div className="mold-record-info">
+//                       <strong>{mold.moldCode}</strong>
+//                       <span>{mold.moldName}</span>
+//                       <small>{mold.partName} · {mold.machine}</small>
+//                     </div>
+//                     <StatusBadge status={mold.status} />
+//                   </div>
+//                 ))}
+//               </div>
+//             </section>
+//           )}
+
+//           {activePath !== '/dashboard' &&
+//             activePath !== '/mold-register' && (
+//               <section className="panel module-placeholder">
+//                 <h3>{pageTitle}</h3>
+//                 <p>
+//                   This module will be designed using the reusable
+//                   MRTMS components in the next development stage.
+//                 </p>
+//               </section>
+//             )}
+
+//         </main>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default App;
 
 
-2. Update src/App.jsx
-Keep your existing Dashboard, PlaceholderPage, and other dashboard code. Make these two changes.
+main.jsx - 
 
-At the top, add this import:
-import MoldRegister from "./pages/MoldRegister";
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
 
+import "./assets/styles/variables.css";
+import "./assets/styles/global.css";
+import "./assets/styles/utilities.css";
+import "./assets/styles/components.css";
 
-Inside the App component, replace the current page-rendering section:
-{activePage === "dashboard" ? (
-  <Dashboard />
-) : (
-  <PlaceholderPage title={menuPages[activePage] || "Page"} />
-)}
-
-
-with:
-{activePage === "dashboard" ? (
-  <Dashboard />
-) : activePage === "molds" ? (
-  <MoldRegister />
-) : (
-  <PlaceholderPage title={menuPages[activePage] || "Page"} />
-)}
-
-
-3. Test the Mold Register
-Your Vite server should refresh automatically. Click Mold Register in the sidebar.
-
-Try these actions:
-Search
-
-Search for MOLD-001 or Customer B. The table should filter immediately.
-
-Status filter
-
-Select Active, Inactive or Under Maintenance.
-
-Add New Mold
-
-Enter a new Mold No., Customer and Model, then click Save Mold.
-
-View Details
-
-Click View Details in a row to open the mold information.
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
