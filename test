@@ -1,764 +1,585 @@
-2. First fix: main layout spacing
-Open:
+1. Create src/pages/MoldRegister.jsx
+Create a new folder named pages inside src, then create MoldRegister.jsx.
 
-frontend/src/assets/styles/components.css
+Paste this complete code:
+import React, { useMemo, useState } from "react";
 
-Find this code:
-.app-main {
-  flex: 1;
-  min-width: 0;
-  margin-left: 260px;
-}
+const initialMolds = [
+  { id: 1, moldNo: "MOLD-001", customer: "Customer A", model: "Model X", group: "Group A", count: 1, status: "Active" },
+  { id: 2, moldNo: "MOLD-002", customer: "Customer B", model: "Model Y", group: "Group B", count: 1, status: "Under Maintenance" },
+  { id: 3, moldNo: "MOLD-003", customer: "Customer C", model: "Model Z", group: "Group A", count: 2, status: "Active" },
+  { id: 4, moldNo: "MOLD-004", customer: "Customer D", model: "Model P", group: "Group C", count: 1, status: "Inactive" },
+  { id: 5, moldNo: "MOLD-005", customer: "Customer E", model: "Model Q", group: "Group B", count: 1, status: "Active" },
+];
 
-
-Replace it with:
-.app-main {
-  flex: 1;
-  min-width: 0;
-  width: calc(100% - 252px);
-  margin-left: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.page-content {
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 24px 28px;
-}
-
-
-Then find the mobile responsive section:
-@media (max-width: 768px) {
-  .app-main {
-    margin-left: 0;
-  }
-}
-
-
-Replace it with:
-@media (max-width: 768px) {
-  .app-main {
-    width: 100%;
-  }
-
-  .page-content {
-    padding: 18px 14px;
-  }
-}
-
-
-This removes the extra left spacing. We will connect the mobile sidebar in the next step.
-3. Second fix: connect the mobile menu
-Your App.jsx already has menuOpen state, but it is not passed to the Sidebar.
-
-In App.jsx, find:
-<Sidebar
-  activePath={activePath}
-  onNavigate={handleNavigate}
-/>
-
-
-Replace it with:
-<Sidebar
-  activePath={activePath}
-  onNavigate={handleNavigate}
-  isOpen={menuOpen}
-/>
-
-
-Now open Sidebar.jsx.
-
-Change the function declaration:
-export default function Sidebar({ activePath = '/dashboard', onNavigate }) {
-
-
-To:
-export default function Sidebar({
-  activePath = '/dashboard',
-  onNavigate,
-  isOpen = false
-}) {
-
-
-Then change the <aside>:
-<aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
-
-
-Add this CSS at the bottom of components.css:
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 1000;
-    width: 252px;
-    min-height: 100vh;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-  }
-
-  .sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-
-  .app-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-}
-
-
-Your existing Header already calls onMenuClick, so the menu button will now control the sidebar.
-4. Third fix: correct the page rendering in App.jsx
-There is another important issue.
-
-Your current code displays the placeholder even when you open Mold Register. Also, /add-mold is not included in your navigation list, so it gets the default Dashboard title.
-
-For now, add these conditions around your existing page sections:
-{activePath === '/dashboard' && (
-  // Your dashboard content
-)}
-
-{activePath === '/molds' && (
-  // Your mold register content
-)}
-
-{activePath === '/add-mold' && (
-  // Add mold page content
-)}
-
-{['/trials', '/tasks', '/reports', '/users', '/settings']
-  .includes(activePath) && (
-    // Temporary placeholder for these modules
-)}
-
-
-This is the structure we will use until all screens are implemented. Don't add a placeholder condition that applies to every page except Dashboard.
-
-
-
-1. src/App.jsx
-Replace the complete contents of App.jsx with:
-import React, { useState } from "react";
-import AppLayout from "./components/layout/AppLayout";
-
-const menuPages = {
-  dashboard: "Dashboard",
-  molds: "Mold Register",
-  trials: "Trial Management",
-  tasks: "Task & Workflow",
-  reports: "Reports",
-  users: "Users & Roles",
-  settings: "Master Settings",
+const emptyForm = {
+  moldNo: "",
+  customer: "",
+  model: "",
+  group: "",
+  count: "1",
+  status: "Active",
 };
 
-const dashboardStats = [
-  { title: "Total Molds", value: "248", change: "Registered molds", icon: "▣" },
-  { title: "Active Molds", value: "186", change: "Currently active", icon: "◉" },
-  { title: "Under Maintenance", value: "18", change: "Maintenance required", icon: "⚙" },
-  { title: "Pending Activities", value: "32", change: "Awaiting action", icon: "◷" },
-];
+export default function MoldRegister() {
+  const [molds, setMolds] = useState(initialMolds);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [showForm, setShowForm] = useState(false);
+  const [selectedMold, setSelectedMold] = useState(null);
+  const [form, setForm] = useState(emptyForm);
+  const [error, setError] = useState("");
 
-const recentMolds = [
-  { moldNo: "MOLD-001", customer: "Customer A", model: "Model X", trial: "T3", status: "In Progress" },
-  { moldNo: "MOLD-002", customer: "Customer B", model: "Model Y", trial: "T2", status: "Pending" },
-  { moldNo: "MOLD-003", customer: "Customer C", model: "Model Z", trial: "T4", status: "Completed" },
-  { moldNo: "MOLD-004", customer: "Customer D", model: "Model P", trial: "T1", status: "Active" },
-];
+  const filteredMolds = useMemo(() => {
+    return molds.filter((mold) => {
+      const searchText = search.toLowerCase();
 
-const pendingTasks = [
-  { mold: "MOLD-001", department: "Tool Room", task: "Mold modification", days: 4 },
-  { mold: "MOLD-002", department: "Maintenance", task: "Mold inspection", days: 2 },
-  { mold: "MOLD-005", department: "Quality", task: "Sample checking", days: 6 },
-];
+      const matchesSearch =
+        mold.moldNo.toLowerCase().includes(searchText) ||
+        mold.customer.toLowerCase().includes(searchText) ||
+        mold.model.toLowerCase().includes(searchText) ||
+        mold.group.toLowerCase().includes(searchText);
 
-function Dashboard() {
+      const matchesStatus =
+        statusFilter === "All" || mold.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [molds, search, statusFilter]);
+
+  const updateForm = (event) => {
+    const { name, value } = event.target;
+    setForm((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleAddMold = (event) => {
+    event.preventDefault();
+    setError("");
+
+    if (!form.moldNo.trim() || !form.customer.trim() || !form.model.trim()) {
+      setError("Please enter Mold No., Customer and Model.");
+      return;
+    }
+
+    const duplicate = molds.some(
+      (mold) => mold.moldNo.toLowerCase() === form.moldNo.trim().toLowerCase()
+    );
+
+    if (duplicate) {
+      setError("This Mold No. already exists.");
+      return;
+    }
+
+    const newMold = {
+      id: Date.now(),
+      ...form,
+      moldNo: form.moldNo.trim(),
+      customer: form.customer.trim(),
+      model: form.model.trim(),
+      group: form.group.trim() || "Not Assigned",
+      count: Number(form.count) || 1,
+    };
+
+    setMolds((previous) => [newMold, ...previous]);
+    setForm(emptyForm);
+    setShowForm(false);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setForm(emptyForm);
+    setError("");
+  };
+
   return (
     <div>
-      <div style={styles.welcome}>
+      <div style={styles.pageHeader}>
         <div>
-          <h2 style={styles.heading}>Dashboard Overview</h2>
+          <h2 style={styles.title}>Mold Register</h2>
           <p style={styles.subtitle}>
-            Monitor mold activities, trials and department progress.
+            Register, search and manage all mold records.
           </p>
         </div>
+
+        <button
+          type="button"
+          style={styles.primaryButton}
+          onClick={() => setShowForm(true)}
+        >
+          + Add New Mold
+        </button>
       </div>
 
-      <div style={styles.statsGrid}>
-        {dashboardStats.map((item) => (
-          <div key={item.title} style={styles.statCard}>
-            <div style={styles.statTop}>
-              <span style={styles.statIcon}>{item.icon}</span>
-              <span style={styles.statLabel}>{item.title}</span>
-            </div>
-            <h2 style={styles.statValue}>{item.value}</h2>
-            <p style={styles.statChange}>{item.change}</p>
-          </div>
-        ))}
+      <div style={styles.summaryGrid}>
+        <SummaryCard label="Total Molds" value={molds.length} />
+        <SummaryCard
+          label="Active Molds"
+          value={molds.filter((m) => m.status === "Active").length}
+        />
+        <SummaryCard
+          label="Under Maintenance"
+          value={molds.filter((m) => m.status === "Under Maintenance").length}
+        />
+        <SummaryCard
+          label="Inactive Molds"
+          value={molds.filter((m) => m.status === "Inactive").length}
+        />
       </div>
 
-      <div style={styles.contentGrid}>
-        <section style={styles.panel}>
-          <div style={styles.panelHeader}>
-            <h3 style={styles.panelTitle}>Recent Mold Records</h3>
-            <span style={styles.viewAll}>View All</span>
+      <section style={styles.panel}>
+        <div style={styles.toolbar}>
+          <div>
+            <h3 style={styles.panelTitle}>All Mold Records</h3>
+            <p style={styles.resultText}>
+              Showing {filteredMolds.length} of {molds.length} molds
+            </p>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Mold No.</th>
-                  <th style={styles.th}>Customer</th>
-                  <th style={styles.th}>Model</th>
-                  <th style={styles.th}>Trial</th>
-                  <th style={styles.th}>Status</th>
+          <div style={styles.filters}>
+            <input
+              type="search"
+              placeholder="Search mold, customer, model..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              style={styles.search}
+            />
+
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Under Maintenance">Under Maintenance</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ overflowX: "auto" }}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Mold No.</th>
+                <th style={styles.th}>Customer</th>
+                <th style={styles.th}>Model</th>
+                <th style={styles.th}>Group</th>
+                <th style={styles.th}>Count</th>
+                <th style={styles.th}>Status</th>
+                <th style={styles.th}>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredMolds.map((mold) => (
+                <tr key={mold.id}>
+                  <td style={styles.td}>
+                    <strong style={{ color: "#078f91" }}>{mold.moldNo}</strong>
+                  </td>
+                  <td style={styles.td}>{mold.customer}</td>
+                  <td style={styles.td}>{mold.model}</td>
+                  <td style={styles.td}>{mold.group}</td>
+                  <td style={styles.td}>{mold.count}</td>
+                  <td style={styles.td}>
+                    <StatusBadge status={mold.status} />
+                  </td>
+                  <td style={styles.td}>
+                    <button
+                      type="button"
+                      style={styles.viewButton}
+                      onClick={() => setSelectedMold(mold)}
+                    >
+                      View Details
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {recentMolds.map((mold) => (
-                  <tr key={mold.moldNo}>
-                    <td style={styles.td}><strong>{mold.moldNo}</strong></td>
-                    <td style={styles.td}>{mold.customer}</td>
-                    <td style={styles.td}>{mold.model}</td>
-                    <td style={styles.td}>{mold.trial}</td>
-                    <td style={styles.td}>
-                      <span style={statusStyle(mold.status)}>{mold.status}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+              ))}
 
-        <section style={styles.panel}>
-          <div style={styles.panelHeader}>
-            <h3 style={styles.panelTitle}>Pending Activities</h3>
-            <span style={styles.viewAll}>View All</span>
-          </div>
+              {filteredMolds.length === 0 && (
+                <tr>
+                  <td colSpan="7" style={styles.empty}>
+                    No mold records found. Try changing your search or filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-          {pendingTasks.map((task, index) => (
-            <div key={index} style={styles.taskItem}>
+      {showForm && (
+        <div style={styles.backdrop} onMouseDown={closeForm}>
+          <div
+            style={styles.modal}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
               <div>
-                <strong style={styles.taskMold}>{task.mold}</strong>
-                <p style={styles.taskDescription}>{task.task}</p>
-                <span style={styles.department}>{task.department}</span>
+                <h3 style={styles.modalTitle}>Add New Mold</h3>
+                <p style={styles.subtitle}>Enter the basic mold information.</p>
               </div>
-              <span style={styles.days}>{task.days} days</span>
+              <button type="button" onClick={closeForm} style={styles.closeButton}>
+                ×
+              </button>
             </div>
-          ))}
-        </section>
-      </div>
-    </div>
-  );
-}
 
-function PlaceholderPage({ title }) {
-  return (
-    <div style={styles.panel}>
-      <h2 style={styles.heading}>{title}</h2>
-      <p style={styles.subtitle}>
-        This module will be developed in the next frontend setup step.
-      </p>
-    </div>
-  );
-}
+            <form onSubmit={handleAddMold}>
+              <div style={styles.formGrid}>
+                <FormInput label="Mold No. *" name="moldNo" value={form.moldNo} onChange={updateForm} placeholder="e.g. MOLD-006" />
+                <FormInput label="Customer *" name="customer" value={form.customer} onChange={updateForm} placeholder="Enter customer name" />
+                <FormInput label="Model *" name="model" value={form.model} onChange={updateForm} placeholder="Enter model name" />
+                <FormInput label="Group" name="group" value={form.group} onChange={updateForm} placeholder="Enter group" />
+                <FormInput label="Count" name="count" type="number" value={form.count} onChange={updateForm} />
+                <div style={styles.field}>
+                  <label style={styles.label}>Status</label>
+                  <select name="status" value={form.status} onChange={updateForm} style={styles.formControl}>
+                    <option>Active</option>
+                    <option>Under Maintenance</option>
+                    <option>Inactive</option>
+                  </select>
+                </div>
+              </div>
 
-export default function App() {
-  const [activePage, setActivePage] = useState("dashboard");
+              {error && <p style={styles.error}>{error}</p>}
 
-  const handleNavigate = (page) => {
-    setActivePage(page);
-  };
-
-  return (
-    <AppLayout
-      activePage={activePage}
-      onNavigate={handleNavigate}
-    >
-      {activePage === "dashboard" ? (
-        <Dashboard />
-      ) : (
-        <PlaceholderPage title={menuPages[activePage] || "Page"} />
+              <div style={styles.formActions}>
+                <button type="button" style={styles.cancelButton} onClick={closeForm}>
+                  Cancel
+                </button>
+                <button type="submit" style={styles.primaryButton}>
+                  Save Mold
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
-    </AppLayout>
+
+      {selectedMold && (
+        <div style={styles.backdrop} onMouseDown={() => setSelectedMold(null)}>
+          <div
+            style={styles.modal}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
+              <div>
+                <h3 style={styles.modalTitle}>Mold Details</h3>
+                <p style={styles.subtitle}>{selectedMold.moldNo}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedMold(null)}
+                style={styles.closeButton}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={styles.detailsGrid}>
+              <Detail label="Mold No." value={selectedMold.moldNo} />
+              <Detail label="Customer" value={selectedMold.customer} />
+              <Detail label="Model" value={selectedMold.model} />
+              <Detail label="Group" value={selectedMold.group} />
+              <Detail label="Count" value={selectedMold.count} />
+              <div>
+                <p style={styles.detailLabel}>Status</p>
+                <StatusBadge status={selectedMold.status} />
+              </div>
+            </div>
+
+            <div style={styles.formActions}>
+              <button
+                type="button"
+                style={styles.primaryButton}
+                onClick={() => setSelectedMold(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
-function statusStyle(status) {
+function SummaryCard({ label, value }) {
+  return (
+    <div style={styles.summaryCard}>
+      <p style={styles.summaryLabel}>{label}</p>
+      <h2 style={styles.summaryValue}>{value}</h2>
+    </div>
+  );
+}
+
+function FormInput({ label, name, value, onChange, placeholder, type = "text" }) {
+  return (
+    <div style={styles.field}>
+      <label style={styles.label}>{label}</label>
+      <input
+        name={name}
+        type={type}
+        min={type === "number" ? "1" : undefined}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        style={styles.formControl}
+      />
+    </div>
+  );
+}
+
+function Detail({ label, value }) {
+  return (
+    <div>
+      <p style={styles.detailLabel}>{label}</p>
+      <strong style={styles.detailValue}>{value}</strong>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
   const colors = {
-    "In Progress": { background: "#e0f2fe", color: "#0369a1" },
-    Pending: { background: "#fff7ed", color: "#c2410c" },
-    Completed: { background: "#dcfce7", color: "#15803d" },
-    Active: { background: "#e0e7ff", color: "#4338ca" },
+    Active: { background: "#dcfce7", color: "#15803d" },
+    "Under Maintenance": { background: "#fff7ed", color: "#c2410c" },
+    Inactive: { background: "#f1f5f9", color: "#475569" },
   };
 
-  return {
-    ...colors[status],
-    padding: "5px 10px",
-    borderRadius: "20px",
-    fontSize: "12px",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  };
+  return (
+    <span style={{ ...styles.badge, ...colors[status] }}>
+      {status}
+    </span>
+  );
 }
 
 const styles = {
-  welcome: { marginBottom: 22 },
-  heading: { margin: 0, fontSize: 22, color: "#172b4d", fontWeight: 700 },
-  subtitle: { marginTop: 7, color: "#718096", fontSize: 13 },
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-    gap: 18,
+  pageHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 15,
+    flexWrap: "wrap",
     marginBottom: 22,
   },
-  statCard: {
+  title: { margin: 0, fontSize: 22, color: "#172b4d" },
+  subtitle: { margin: "7px 0 0", color: "#718096", fontSize: 13 },
+  primaryButton: {
+    border: "none",
+    borderRadius: 7,
+    background: "#079b9b",
+    color: "#fff",
+    padding: "11px 17px",
+    fontWeight: 600,
+    fontSize: 13,
+    cursor: "pointer",
+  },
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+    gap: 16,
+    marginBottom: 22,
+  },
+  summaryCard: {
     background: "#fff",
     border: "1px solid #e8edf3",
-    borderRadius: 10,
-    padding: 20,
-    minWidth: 0,
+    borderRadius: 9,
+    padding: "17px 19px",
   },
-  statTop: { display: "flex", alignItems: "center", gap: 10 },
-  statIcon: {
-    background: "#e6f7f7",
-    color: "#079b9b",
-    borderRadius: 8,
-    padding: "8px 10px",
-    fontSize: 18,
-  },
-  statLabel: { color: "#64748b", fontSize: 13 },
-  statValue: { margin: "15px 0 5px", color: "#172b4d", fontSize: 27 },
-  statChange: { margin: 0, color: "#94a3b8", fontSize: 12 },
-  contentGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1.6fr) minmax(280px, 1fr)",
-    gap: 20,
-    alignItems: "start",
-  },
+  summaryLabel: { margin: 0, color: "#718096", fontSize: 12 },
+  summaryValue: { margin: "10px 0 0", color: "#172b4d", fontSize: 25 },
   panel: {
     background: "#fff",
     border: "1px solid #e8edf3",
     borderRadius: 10,
     padding: 20,
-    minWidth: 0,
   },
-  panelHeader: {
+  toolbar: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    flexWrap: "wrap",
+    gap: 15,
+    marginBottom: 20,
   },
-  panelTitle: { margin: 0, fontSize: 16, color: "#172b4d" },
-  viewAll: { color: "#079b9b", fontSize: 12, fontWeight: 600 },
+  panelTitle: { margin: 0, color: "#172b4d", fontSize: 16 },
+  resultText: { margin: "5px 0 0", color: "#94a3b8", fontSize: 11 },
+  filters: { display: "flex", gap: 10, flexWrap: "wrap" },
+  search: {
+    width: 240,
+    maxWidth: "100%",
+    padding: "10px 12px",
+    border: "1px solid #dce3eb",
+    borderRadius: 6,
+    fontSize: 12,
+  },
+  select: {
+    padding: "10px 12px",
+    border: "1px solid #dce3eb",
+    borderRadius: 6,
+    background: "#fff",
+    color: "#475569",
+    fontSize: 12,
+  },
   table: { width: "100%", borderCollapse: "collapse", textAlign: "left" },
   th: {
-    padding: "12px 10px",
-    color: "#718096",
     background: "#f8fafc",
+    color: "#64748b",
     fontSize: 12,
-    fontWeight: 600,
+    padding: "13px 12px",
     whiteSpace: "nowrap",
   },
   td: {
-    padding: "14px 10px",
     borderBottom: "1px solid #edf1f5",
     color: "#475569",
     fontSize: 12,
+    padding: "14px 12px",
     whiteSpace: "nowrap",
   },
-  taskItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 10,
-    padding: "14px 0",
-    borderBottom: "1px solid #edf1f5",
-  },
-  taskMold: { color: "#172b4d", fontSize: 13 },
-  taskDescription: { margin: "5px 0", color: "#64748b", fontSize: 12 },
-  department: { color: "#079b9b", fontSize: 11 },
-  days: {
-    color: "#c2410c",
-    background: "#fff7ed",
-    borderRadius: 6,
-    padding: "6px 8px",
+  badge: {
+    display: "inline-block",
+    borderRadius: 20,
+    padding: "5px 10px",
     fontSize: 11,
+    fontWeight: 600,
     whiteSpace: "nowrap",
   },
-};
-
-
-2. src/components/layout/AppLayout.jsx
-This file controls the overall screen structure. The sidebar stays on the left, while the header and page content stay together on the right.
-import React, { useState } from "react";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
-
-export default function AppLayout({ activePage, onNavigate, children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleNavigate = (page) => {
-    onNavigate(page);
-    setSidebarOpen(false);
-  };
-
-  return (
-    <div style={styles.app}>
-      {sidebarOpen && (
-        <div
-          style={styles.overlay}
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <aside
-        style={{
-          ...styles.sidebar,
-          ...(sidebarOpen ? styles.sidebarOpen : {}),
-        }}
-      >
-        <Sidebar
-          activePage={activePage}
-          onNavigate={handleNavigate}
-          onClose={() => setSidebarOpen(false)}
-        />
-      </aside>
-
-      <div style={styles.main}>
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
-        <main style={styles.content}>
-          {children}
-        </main>
-
-        <footer style={styles.footer}>
-          MRTMS – Mold Tracking & Management System
-        </footer>
-      </div>
-    </div>
-  );
-}
-
-const styles = {
-  app: {
-    display: "flex",
-    minHeight: "100vh",
-    background: "#f4f7fb",
-    fontFamily: "Arial, sans-serif",
-    position: "relative",
-  },
-  sidebar: {
-    width: 250,
-    minWidth: 250,
-    background: "#142b45",
-    minHeight: "100vh",
-    position: "sticky",
-    top: 0,
-    height: "100vh",
-    overflowY: "auto",
-    zIndex: 20,
-  },
-  main: {
-    flex: 1,
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-  },
-  content: {
-    flex: 1,
-    padding: 25,
-    minWidth: 0,
-    width: "100%",
-    boxSizing: "border-box",
-  },
-  footer: {
-    padding: "14px 25px",
-    color: "#94a3b8",
-    fontSize: 11,
-    borderTop: "1px solid #e8edf3",
-    background: "#fff",
-  },
-  overlay: {
-    display: "none",
-  },
-  sidebarOpen: {
-    transform: "translateX(0)",
-  },
-};
-
-
-3. src/components/layout/Sidebar.jsx
-This gives you the navigation menu and highlights the currently selected page.
-import React from "react";
-
-const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: "▦" },
-  { id: "molds", label: "Mold Register", icon: "▣" },
-  { id: "trials", label: "Trial Management", icon: "◷" },
-  { id: "tasks", label: "Task & Workflow", icon: "☷" },
-  { id: "reports", label: "Reports", icon: "▤" },
-  { id: "users", label: "Users & Roles", icon: "♙" },
-  { id: "settings", label: "Master Settings", icon: "⚙" },
-];
-
-export default function Sidebar({ activePage, onNavigate, onClose }) {
-  return (
-    <div style={styles.container}>
-      <div style={styles.brand}>
-        <div style={styles.logo}>M</div>
-        <div>
-          <h2 style={styles.brandName}>MRTMS</h2>
-          <p style={styles.brandSub}>Mold Management</p>
-        </div>
-      </div>
-
-      <div style={styles.sectionLabel}>MAIN MENU</div>
-
-      <nav>
-        {menuItems.map((item) => {
-          const active = activePage === item.id;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                onNavigate(item.id);
-                if (onClose) onClose();
-              }}
-              style={{
-                ...styles.menuItem,
-                ...(active ? styles.activeItem : {}),
-              }}
-            >
-              <span style={styles.icon}>{item.icon}</span>
-              <span>{item.label}</span>
-              {active && <span style={styles.activeMark} />}
-            </button>
-          );
-        })}
-      </nav>
-
-      <div style={styles.sidebarBottom}>
-        <div style={styles.version}>MRTMS v1.0</div>
-        <div style={styles.department}>Molding Department</div>
-      </div>
-    </div>
-  );
-}
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    minHeight: "100%",
-    padding: "22px 14px",
-    boxSizing: "border-box",
-    color: "#fff",
-  },
-  brand: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "4px 8px 28px",
-    borderBottom: "1px solid #2c4158",
-    marginBottom: 25,
-  },
-  logo: {
-    width: 42,
-    height: 42,
-    borderRadius: 10,
-    background: "#079b9b",
-    display: "grid",
-    placeItems: "center",
-    fontSize: 23,
-    fontWeight: 700,
-  },
-  brandName: { margin: 0, fontSize: 19, letterSpacing: 1 },
-  brandSub: { margin: "4px 0 0", color: "#aab9c9", fontSize: 10 },
-  sectionLabel: {
-    color: "#8da0b4",
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: 1,
-    padding: "0 12px 12px",
-  },
-  menuItem: {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    gap: 13,
-    border: "none",
-    background: "transparent",
-    color: "#c4d0dc",
-    padding: "13px 12px",
-    marginBottom: 5,
-    borderRadius: 7,
-    fontSize: 13,
-    textAlign: "left",
+  viewButton: {
+    border: "1px solid #b8e5e3",
+    background: "#effbfa",
+    color: "#078b88",
+    borderRadius: 5,
+    padding: "7px 10px",
     cursor: "pointer",
-    position: "relative",
-  },
-  activeItem: {
-    background: "#079b9b",
-    color: "#fff",
+    fontSize: 11,
     fontWeight: 600,
   },
-  icon: { width: 20, fontSize: 17, textAlign: "center" },
-  activeMark: {
-    position: "absolute",
-    right: 10,
-    width: 5,
-    height: 5,
-    borderRadius: "50%",
-    background: "#fff",
+  empty: {
+    textAlign: "center",
+    padding: 35,
+    color: "#94a3b8",
+    fontSize: 13,
   },
-  sidebarBottom: {
-    marginTop: "auto",
-    borderTop: "1px solid #2c4158",
-    padding: "18px 10px 0",
-  },
-  version: { color: "#8da0b4", fontSize: 10 },
-  department: { color: "#c4d0dc", fontSize: 11, marginTop: 6 },
-};
-
-
-4. src/components/layout/Header.jsx
-This creates the top header with the mobile menu button, search field, notifications and user profile.
-import React from "react";
-
-export default function Header({ onMenuClick }) {
-  return (
-    <header style={styles.header}>
-      <div style={styles.left}>
-        <button
-          type="button"
-          onClick={onMenuClick}
-          style={styles.menuButton}
-          aria-label="Toggle navigation"
-        >
-          ☰
-        </button>
-
-        <div>
-          <h3 style={styles.title}>Mold Tracking System</h3>
-          <p style={styles.subtitle}>Molding Department Workspace</p>
-        </div>
-      </div>
-
-      <div style={styles.right}>
-        <input
-          type="search"
-          placeholder="Search mold, customer..."
-          style={styles.search}
-        />
-
-        <button type="button" style={styles.notification} aria-label="Notifications">
-          ♧
-          <span style={styles.notificationDot} />
-        </button>
-
-        <div style={styles.profile}>
-          <div style={styles.avatar}>A</div>
-          <div style={styles.userInfo}>
-            <strong style={styles.userName}>Admin User</strong>
-            <span style={styles.userRole}>Molding Admin</span>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-const styles = {
-  header: {
-    height: 72,
-    minHeight: 72,
-    background: "#fff",
-    borderBottom: "1px solid #e8edf3",
+  backdrop: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 100,
+    background: "rgba(15, 23, 42, 0.55)",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    padding: "0 25px",
-    gap: 20,
+    padding: 18,
+  },
+  modal: {
+    background: "#fff",
+    borderRadius: 12,
+    padding: 24,
+    width: "100%",
+    maxWidth: 620,
+    maxHeight: "90vh",
+    overflowY: "auto",
     boxSizing: "border-box",
   },
-  left: { display: "flex", alignItems: "center", gap: 15 },
-  menuButton: {
+  modalHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 22,
+  },
+  modalTitle: { margin: 0, color: "#172b4d", fontSize: 19 },
+  closeButton: {
     border: "none",
     background: "#f1f5f9",
-    borderRadius: 7,
-    padding: "8px 11px",
-    fontSize: 19,
-    cursor: "pointer",
-    color: "#334155",
-  },
-  title: { margin: 0, color: "#172b4d", fontSize: 16 },
-  subtitle: { margin: "4px 0 0", color: "#94a3b8", fontSize: 11 },
-  right: { display: "flex", alignItems: "center", gap: 20 },
-  search: {
-    width: 220,
-    maxWidth: "30vw",
-    padding: "10px 13px",
-    border: "1px solid #e2e8f0",
-    borderRadius: 7,
-    outline: "none",
-    fontSize: 12,
-  },
-  notification: {
-    border: "none",
-    background: "transparent",
-    fontSize: 21,
-    cursor: "pointer",
-    position: "relative",
+    borderRadius: 6,
+    width: 30,
+    height: 30,
+    fontSize: 22,
     color: "#475569",
+    cursor: "pointer",
   },
-  notificationDot: {
-    position: "absolute",
-    width: 7,
-    height: 7,
-    background: "#ef4444",
-    borderRadius: "50%",
-    top: 1,
-    right: 0,
-  },
-  profile: { display: "flex", alignItems: "center", gap: 10 },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: "50%",
-    background: "#dff5f3",
-    color: "#078b88",
+  formGrid: {
     display: "grid",
-    placeItems: "center",
-    fontWeight: 700,
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 16,
   },
-  userInfo: { display: "flex", flexDirection: "column", gap: 3 },
-  userName: { fontSize: 12, color: "#334155" },
-  userRole: { fontSize: 10, color: "#94a3b8" },
+  field: { display: "flex", flexDirection: "column", gap: 7 },
+  label: { fontSize: 12, fontWeight: 600, color: "#475569" },
+  formControl: {
+    width: "100%",
+    boxSizing: "border-box",
+    border: "1px solid #dce3eb",
+    borderRadius: 6,
+    padding: "11px 12px",
+    fontSize: 13,
+    color: "#334155",
+    background: "#fff",
+  },
+  error: { color: "#dc2626", fontSize: 12, marginTop: 14 },
+  formActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 24,
+  },
+  cancelButton: {
+    border: "1px solid #dce3eb",
+    borderRadius: 7,
+    background: "#fff",
+    color: "#475569",
+    padding: "10px 16px",
+    cursor: "pointer",
+  },
+  detailsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 22,
+  },
+  detailLabel: { margin: "0 0 7px", color: "#94a3b8", fontSize: 11 },
+  detailValue: { color: "#334155", fontSize: 13 },
 };
 
 
-5. Check src/main.jsx
-Make sure your main.jsx imports App and renders it only once. It should look similar to this:
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App.jsx";
+2. Update src/App.jsx
+Keep your existing Dashboard, PlaceholderPage, and other dashboard code. Make these two changes.
 
-import "./assets/styles/variables.css";
-import "./assets/styles/global.css";
-import "./assets/styles/utilities.css";
-import "./assets/styles/components.css";
+At the top, add this import:
+import MoldRegister from "./pages/MoldRegister";
 
-createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+
+Inside the App component, replace the current page-rendering section:
+{activePage === "dashboard" ? (
+  <Dashboard />
+) : (
+  <PlaceholderPage title={menuPages[activePage] || "Page"} />
+)}
+
+
+with:
+{activePage === "dashboard" ? (
+  <Dashboard />
+) : activePage === "molds" ? (
+  <MoldRegister />
+) : (
+  <PlaceholderPage title={menuPages[activePage] || "Page"} />
+)}
+
+
+3. Test the Mold Register
+Your Vite server should refresh automatically. Click Mold Register in the sidebar.
+
+Try these actions:
+Search
+
+Search for MOLD-001 or Customer B. The table should filter immediately.
+
+Status filter
+
+Select Active, Inactive or Under Maintenance.
+
+Add New Mold
+
+Enter a new Mold No., Customer and Model, then click Save Mold.
+
+View Details
+
+Click View Details in a row to open the mold information.
