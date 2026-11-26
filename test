@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import { initialMolds } from "../data/mockData";
 import MoldForm from "../components/mold/MoldForm";
@@ -11,16 +10,16 @@ export default function MoldRegister({ onViewMold }) {
 
   const [showForm, setShowForm] = useState(false);
   const [editingMold, setEditingMold] = useState(null);
+  const [viewingMold, setViewingMold] = useState(null);
 
-  // Filter molds
   const filteredMolds = useMemo(() => {
     return molds.filter((mold) => {
       const searchText = search.toLowerCase();
 
       const matchesSearch =
-        String(mold.moldNo || "").toLowerCase().includes(searchText) ||
-        String(mold.customer || "").toLowerCase().includes(searchText) ||
-        String(mold.model || "").toLowerCase().includes(searchText);
+        mold.moldNo.toLowerCase().includes(searchText) ||
+        mold.customer.toLowerCase().includes(searchText) ||
+        mold.model.toLowerCase().includes(searchText);
 
       const matchesStatus =
         statusFilter === "All" || mold.status === statusFilter;
@@ -32,122 +31,104 @@ export default function MoldRegister({ onViewMold }) {
     });
   }, [molds, search, statusFilter, groupFilter]);
 
-  // Summary counts
-  const totalMolds = molds.length;
-
-  const activeMolds = molds.filter(
-    (mold) => mold.status === "Active"
-  ).length;
-
-  const maintenanceMolds = molds.filter(
-    (mold) => mold.status === "Under Maintenance"
-  ).length;
-
-  const inactiveMolds = molds.filter(
-    (mold) => mold.status === "Inactive"
-  ).length;
-
-  // Open Add Mold form
   const openAddForm = () => {
     setEditingMold(null);
     setShowForm(true);
   };
 
-  // Open Edit Mold form
   const openEditForm = (mold) => {
     setEditingMold(mold);
     setShowForm(true);
   };
 
-  // Save new or edited mold
-  const handleSaveMold = (formData) => {
-    const duplicateMold = molds.some(
-      (mold) =>
-        String(mold.moldNo).trim().toLowerCase() ===
-          String(formData.moldNo).trim().toLowerCase() &&
-        mold.id !== editingMold?.id
-    );
-
-    if (duplicateMold) {
-      alert("This Mold Number already exists.");
-      return;
-    }
-
-    if (editingMold) {
-      setMolds((previousMolds) =>
-        previousMolds.map((mold) =>
-          mold.id === editingMold.id
-            ? { ...mold, ...formData }
-            : mold
-        )
-      );
-    } else {
-      const newMold = {
-        ...formData,
-        id: Date.now(),
-      };
-
-      setMolds((previousMolds) => [...previousMolds, newMold]);
-    }
-
+  const closeForm = () => {
     setShowForm(false);
     setEditingMold(null);
   };
 
+  const handleSaveMold = (formData) => {
+    const duplicate = molds.some(
+      (mold) =>
+        mold.moldNo.toLowerCase() === formData.moldNo.toLowerCase() &&
+        mold.id !== editingMold?.id
+    );
+
+    if (duplicate) {
+      window.alert("This Mold Number already exists.");
+      return;
+    }
+
+    if (editingMold) {
+      setMolds((previous) =>
+        previous.map((mold) =>
+          mold.id === editingMold.id
+            ? { ...formData, id: editingMold.id }
+            : mold
+        )
+      );
+    } else {
+      setMolds((previous) => [
+        ...previous,
+        { ...formData, id: Date.now() },
+      ]);
+    }
+
+    closeForm();
+  };
+
+  const activeCount = molds.filter((m) => m.status === "Active").length;
+  const pendingCount = molds.filter((m) => m.status === "Pending").length;
+  const maintenanceCount = molds.filter(
+    (m) => m.status === "Under Maintenance"
+  ).length;
+
   return (
     <div className="mold-register-page">
-      {/* Page Heading */}
       <div className="mold-register-heading">
         <div>
-          <h1>Mold Register</h1>
-          <p>Manage and monitor all registered molds.</p>
+          <h2>Mold Register</h2>
+          <p>View and manage all registered molds.</p>
         </div>
 
-        <button
-          className="primary-button"
-          onClick={openAddForm}
-        >
-          + Add New Mold
+        <button className="mold-btn-primary" onClick={openAddForm}>
+          + Add Mold
         </button>
       </div>
 
-      {/* Summary Cards */}
       <div className="mold-summary-grid">
         <div className="mold-summary-card">
           <span>Total Molds</span>
-          <h2>{totalMolds}</h2>
+          <strong>{molds.length}</strong>
         </div>
 
         <div className="mold-summary-card">
           <span>Active Molds</span>
-          <h2>{activeMolds}</h2>
+          <strong>{activeCount}</strong>
+        </div>
+
+        <div className="mold-summary-card">
+          <span>Pending Molds</span>
+          <strong>{pendingCount}</strong>
         </div>
 
         <div className="mold-summary-card">
           <span>Under Maintenance</span>
-          <h2>{maintenanceMolds}</h2>
-        </div>
-
-        <div className="mold-summary-card">
-          <span>Inactive Molds</span>
-          <h2>{inactiveMolds}</h2>
+          <strong>{maintenanceCount}</strong>
         </div>
       </div>
 
-      {/* Mold Register Table */}
-      <div className="mold-register-panel">
+      <section className="mold-register-panel">
         <div className="mold-register-panel-heading">
           <div>
-            <h2>All Molds</h2>
-            <p>Search, filter and manage mold records.</p>
+            <h3>All Mold Records</h3>
+            <p>{filteredMolds.length} records found</p>
           </div>
         </div>
 
-        {/* Filters */}
         <div className="mold-register-filters">
           <input
-            type="text"
-            placeholder="Search Mold No., Customer or Model..."
+            type="search"
+            placeholder="Search mold number, customer or model..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -156,10 +137,11 @@ export default function MoldRegister({ onViewMold }) {
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
           >
-            <option value="All">All Status</option>
+            <option value="All">All Statuses</option>
             <option value="Active">Active</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
             <option value="Under Maintenance">Under Maintenance</option>
-            <option value="Inactive">Inactive</option>
           </select>
 
           <select
@@ -167,22 +149,18 @@ export default function MoldRegister({ onViewMold }) {
             onChange={(event) => setGroupFilter(event.target.value)}
           >
             <option value="All">All Groups</option>
-            {[...new Set(molds.map((mold) => mold.group).filter(Boolean))].map(
-              (group) => (
-                <option key={group} value={group}>
-                  {group}
-                </option>
-              )
-            )}
+            <option value="Automotive">Automotive</option>
+            <option value="Industrial">Industrial</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
-        {/* Table */}
         <div className="mold-table-wrapper">
           <table className="mold-register-table">
             <thead>
               <tr>
-                <th>Mold No.</th>
+                <th>Mold Number</th>
                 <th>Customer</th>
                 <th>Model</th>
                 <th>Group</th>
@@ -197,21 +175,17 @@ export default function MoldRegister({ onViewMold }) {
               {filteredMolds.length > 0 ? (
                 filteredMolds.map((mold) => (
                   <tr key={mold.id}>
-                    <td>{mold.moldNo}</td>
+                    <td><strong>{mold.moldNo}</strong></td>
                     <td>{mold.customer}</td>
                     <td>{mold.model}</td>
-                    <td>{mold.group}</td>
+                    <td>{mold.group || "-"}</td>
                     <td>{mold.count}</td>
-                    <td>{mold.subsidiary}</td>
+                    <td>{mold.subsidiary || "-"}</td>
                     <td>
                       <span
-                        className={`mold-status ${
-                          mold.status === "Active"
-                            ? "active"
-                            : mold.status === "Under Maintenance"
-                            ? "maintenance"
-                            : "inactive"
-                        }`}
+                        className={`mold-status ${mold.status
+                          .toLowerCase()
+                          .replaceAll(" ", "-")}`}
                       >
                         {mold.status}
                       </span>
@@ -220,7 +194,7 @@ export default function MoldRegister({ onViewMold }) {
                       <div className="mold-row-actions">
                         <button
                           className="mold-action-view"
-                          onClick={() => onViewMold?.(mold)}
+                          onClick={() => setViewingMold(mold)}
                         >
                           View
                         </button>
@@ -237,46 +211,124 @@ export default function MoldRegister({ onViewMold }) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="mold-empty-state">
-                    No molds found.
+                  <td colSpan="8" className="mold-empty-row">
+                    No mold records found. Try changing your search or filters.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+      </section>
 
-        <div className="mold-table-footer">
-          Showing {filteredMolds.length} of {totalMolds} molds
-        </div>
-      </div>
-
-      {/* Add / Edit Mold Modal */}
       {showForm && (
         <div className="mold-modal-overlay">
           <div className="mold-modal">
             <div className="mold-modal-heading">
-              <h2>{editingMold ? "Edit Mold" : "Add New Mold"}</h2>
+              <div>
+                <h3>{editingMold ? "Edit Mold" : "Register New Mold"}</h3>
+                <p>
+                  {editingMold
+                    ? "Update the mold information."
+                    : "Enter the basic mold information below."}
+                </p>
+              </div>
 
               <button
+                type="button"
                 className="mold-modal-close"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingMold(null);
-                }}
+                onClick={closeForm}
+                aria-label="Close form"
               >
                 ×
               </button>
             </div>
 
             <MoldForm
+              key={editingMold ? editingMold.id : "new-mold"}
               initialData={editingMold}
               onSave={handleSaveMold}
-              onCancel={() => {
-                setShowForm(false);
-                setEditingMold(null);
-              }}
+              onCancel={closeForm}
             />
+          </div>
+        </div>
+      )}
+
+      {viewingMold && (
+        <div
+          className="mold-modal-overlay"
+          onClick={() => setViewingMold(null)}
+        >
+          <div
+            className="mold-modal mold-details-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mold-modal-heading">
+              <div>
+                <h3>Mold Details</h3>
+                <p>Complete basic information for this mold.</p>
+              </div>
+
+              <button
+                type="button"
+                className="mold-modal-close"
+                onClick={() => setViewingMold(null)}
+                aria-label="Close details"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mold-details-grid">
+              <div>
+                <span>Mold Number</span>
+                <strong>{viewingMold.moldNo}</strong>
+              </div>
+              <div>
+                <span>Customer</span>
+                <strong>{viewingMold.customer}</strong>
+              </div>
+              <div>
+                <span>Model</span>
+                <strong>{viewingMold.model}</strong>
+              </div>
+              <div>
+                <span>Group</span>
+                <strong>{viewingMold.group || "-"}</strong>
+              </div>
+              <div>
+                <span>Count</span>
+                <strong>{viewingMold.count}</strong>
+              </div>
+              <div>
+                <span>Subsidiary</span>
+                <strong>{viewingMold.subsidiary || "-"}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>{viewingMold.status}</strong>
+              </div>
+            </div>
+
+            <div className="mold-form-actions">
+              <button
+                className="mold-btn-secondary"
+                onClick={() => setViewingMold(null)}
+              >
+                Close
+              </button>
+
+              <button
+                className="mold-btn-primary"
+                onClick={() => {
+                  const selectedMold = viewingMold;
+                  setViewingMold(null);
+                  openEditForm(selectedMold);
+                }}
+              >
+                Edit Mold
+              </button>
+            </div>
           </div>
         </div>
       )}
