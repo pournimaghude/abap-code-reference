@@ -1,3 +1,85 @@
+1. Final CSS organization for MRTMS
+Your existing 1,487-line components.css can stay as it is temporarily. We'll separate styles gradually, without disturbing the working pages.
+
+I recommend this structure:
+src/
+ └── assets/
+     └── styles/
+         ├── variables.css
+         ├── global.css
+         ├── utilities.css
+         ├── components.css
+         ├── layout.css
+         ├── dashboard.css
+         ├── mold.css
+         ├── forms.css
+         └── tables.css
+
+
+What each file will contain:
+CSS file	What belongs inside
+variables.css	Colors, fonts, reusable design values
+global.css	Body, headings, base styles
+utilities.css	Reusable helper classes
+components.css	Buttons, badges, cards, modals
+layout.css	Sidebar, header, page layout
+dashboard.css	Dashboard-specific styles
+mold.css	Mold Register and Mold Details
+forms.css	Form fields, validation, form buttons
+tables.css	Data tables, filters, pagination
+
+Important: Don't move all your existing CSS now. We can accidentally break the dashboard if we move styles without checking their dependencies.
+
+For now, leave components.css untouched. New Mold Details-specific CSS will go into mold.css.
+2. Prepare the CSS file for the next module
+Your work:
+1. Open frontend/src/assets/styles/.
+2. Create a new file named mold.css.
+3. Leave it empty for now.
+4. Open frontend/src/main.jsx.
+5. Add this import after your existing CSS imports:
+import "./assets/styles/mold.css";
+
+
+For example, your imports should look like this (keep any other existing imports):
+import "./assets/styles/global.css";
+import "./assets/styles/utilities.css";
+import "./assets/styles/components.css";
+import "./assets/styles/mold.css";
+
+
+Do not remove any existing CSS imports.
+
+Later, we will move Mold Register and Mold Details styles into mold.css carefully.
+3. How we will connect the Mold Details page
+Your existing App.jsx needs one small improvement: it must remember which mold the user selected.
+
+The navigation will work like this:
+Mold Register
+List of all mold records
+Click View on a mold
+
+Mold Details Page
+Details of the selected mold
+
+Trial History
+
+
+Feedback History
+
+
+Department Tasks
+
+
+Movement History
+
+
+
+
+4. Update App.jsx
+Your work: Open frontend/src/App.jsx and replace its code with this version.
+
+This adds selected-mold tracking and a route for the details page.
 
 import React, { useState } from "react";
 
@@ -5,19 +87,23 @@ import AppLayout from "./components/layout/AppLayout";
 
 import Dashboard from "./pages/Dashboard";
 import MoldRegister from "./pages/MoldRegister";
-
-// These pages will be connected as we implement each module.
-// import TrialManagement from "./pages/TrialManagement";
-// import DepartmentTasks from "./pages/DepartmentTasks";
-// import Reports from "./pages/Reports";
-// import UsersRoles from "./pages/UsersRoles";
-// import MasterSettings from "./pages/MasterSettings";
+import MoldDetailsPage from "./pages/MoldDetailsPage";
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
+  const [selectedMold, setSelectedMold] = useState(null);
 
   const handleNavigate = (page) => {
     setActivePage(page);
+  };
+
+  const handleViewMold = (mold) => {
+    setSelectedMold(mold);
+    setActivePage("mold-details");
+  };
+
+  const handleBackToMolds = () => {
+    setActivePage("molds");
   };
 
   const renderPage = () => {
@@ -26,22 +112,15 @@ export default function App() {
         return <Dashboard onNavigate={handleNavigate} />;
 
       case "molds":
-        return <MoldRegister />;
+        return <MoldRegister onViewMold={handleViewMold} />;
 
-      // case "trials":
-      //   return <TrialManagement />;
-
-      // case "tasks":
-      //   return <DepartmentTasks />;
-
-      // case "reports":
-      //   return <Reports />;
-
-      // case "users":
-      //   return <UsersRoles />;
-
-      // case "settings":
-      //   return <MasterSettings />;
+      case "mold-details":
+        return (
+          <MoldDetailsPage
+            mold={selectedMold}
+            onBack={handleBackToMolds}
+          />
+        );
 
       default:
         return <Dashboard onNavigate={handleNavigate} />;
@@ -57,3 +136,240 @@ export default function App() {
     </AppLayout>
   );
 }
+
+
+
+Important: This code imports MoldDetailsPage.jsx, so that file must have a valid default-exported React component. We'll create it in the next step before you run the application.
+5. Make one small change in MoldRegister.jsx
+We need the View button to open the dedicated page instead of the old details popup.
+
+Make these changes:
+
+1. Change the component declaration:
+export default function MoldRegister({ onViewMold }) {
+
+
+2. Find the View button in the table and change its click handler to:
+onClick={() => onViewMold(mold)}
+
+
+3. Remove the old viewingMold state and its details-modal JSX block. The dedicated page will replace that modal.
+
+Keep the Edit functionality and Add Mold functionality unchanged.
+6. Create MoldDetailsPage.jsx
+Open:
+
+frontend/src/pages/MoldDetailsPage.jsx
+
+Paste this code:
+
+import React from "react";
+
+export default function MoldDetailsPage({ mold, onBack }) {
+  if (!mold) {
+    return (
+      <div className="mold-details-page">
+        <button className="mold-btn-secondary" onClick={onBack}>
+          Back to Mold Register
+        </button>
+        <p>No mold selected.</p>
+      </div>
+    );
+  }
+
+  const details = [
+    ["Mold Number", mold.moldNo],
+    ["Customer", mold.customer],
+    ["Model", mold.model],
+    ["Group", mold.group || "-"],
+    ["Count", mold.count],
+    ["Subsidiary", mold.subsidiary || "-"],
+    ["Status", mold.status],
+  ];
+
+  return (
+    <div className="mold-details-page">
+      <div className="mold-details-page-heading">
+        <div>
+          <button className="mold-back-button" onClick={onBack}>
+            ← Back to Mold Register
+          </button>
+
+          <h2>{mold.moldNo}</h2>
+          <p>Complete mold information and lifecycle history.</p>
+        </div>
+
+        <span
+          className={`mold-status ${mold.status
+            .toLowerCase()
+            .replaceAll(" ", "-")}`}
+        >
+          {mold.status}
+        </span>
+      </div>
+
+      <section className="mold-details-section">
+        <h3>Basic Information</h3>
+
+        <div className="mold-details-grid">
+          {details.map(([label, value]) => (
+            <div key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mold-details-section">
+        <h3>Mold Lifecycle</h3>
+
+        <div className="mold-history-placeholder">
+          <div className="mold-history-icon">01</div>
+          <div>
+            <strong>Trial History</strong>
+            <p>Trial records will be displayed here.</p>
+          </div>
+        </div>
+
+        <div className="mold-history-placeholder">
+          <div className="mold-history-icon">02</div>
+          <div>
+            <strong>Customer Feedback</strong>
+            <p>Customer feedback cycles will be displayed here.</p>
+          </div>
+        </div>
+
+        <div className="mold-history-placeholder">
+          <div className="mold-history-icon">03</div>
+          <div>
+            <strong>Department Work History</strong>
+            <p>Department assignments and completion dates will be displayed here.</p>
+          </div>
+        </div>
+
+        <div className="mold-history-placeholder">
+          <div className="mold-history-icon">04</div>
+          <div>
+            <strong>Mold Movement History</strong>
+            <p>Mold handovers and movement records will be displayed here.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+
+
+7. Add CSS in mold.css
+Open frontend/src/assets/styles/mold.css and paste:
+
+/* =================================
+   MOLD DETAILS PAGE
+================================= */
+
+.mold-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.mold-details-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.mold-details-page-heading h2 {
+  margin: 14px 0 6px;
+  color: #172b4d;
+  font-size: 23px;
+}
+
+.mold-details-page-heading p {
+  margin: 0;
+  color: #8492a6;
+  font-size: 13px;
+}
+
+.mold-back-button {
+  padding: 7px 0;
+  border: none;
+  background: transparent;
+  color: #159c9b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mold-details-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.mold-details-section h3 {
+  margin: 0 0 18px;
+  color: #172b4d;
+  font-size: 16px;
+}
+
+.mold-history-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px 0;
+  border-top: 1px solid #edf1f5;
+}
+
+.mold-history-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #e7f7f7;
+  color: #159c9b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mold-history-placeholder strong {
+  color: #172b4d;
+  font-size: 13px;
+}
+
+.mold-history-placeholder p {
+  margin: 5px 0 0;
+  color: #8492a6;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .mold-details-page-heading {
+    align-items: flex-start;
+  }
+
+  .mold-details-section {
+    padding: 16px;
+  }
+}
+
+
+
+
+8. Test the connection
+After completing the changes:
+1. Save all files.
+2. Open your browser.
+3. Click Mold Register.
+4. Click View on MOLD-001.
+5. You should reach the dedicated Mold Details page.
+6. Click Back to Mold Register.
+Expected result
+ Your selected mold's details should appear on a separate page, while the sidebar and header remain visible.
