@@ -1,5 +1,215 @@
-App.jsx - 
+import React from 'react';
+import {
+  Package,
+  CheckCircle,
+  Wrench,
+  Clock
+} from 'lucide-react';
 
+const iconMap = {
+  Package,
+  CheckCircle,
+  Wrench,
+  Clock
+};
+
+function StatCard({ title, value, icon, color, trend }) {
+  const Icon = iconMap[icon] || Package;
+
+  return (
+    <div className={`stat-card stat-card-${color || 'blue'}`}>
+      <div className="stat-card-content">
+        <div className="stat-card-info">
+          <p className="stat-card-title">{title}</p>
+          <h2 className="stat-card-value">{value}</h2>
+          <span className="stat-card-trend">{trend}</span>
+        </div>
+
+        <div className="stat-card-icon">
+          <Icon size={25} strokeWidth={2} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default StatCard;
+
+import DataTable from '../tables/DataTable';
+import StatusBadge from '../common/StatusBadge';
+
+export default function RecentMolds({ molds = [], onViewAll }) {
+  const columns = [
+    {
+      key: 'moldCode',
+      label: 'MOLD NUMBER'
+    },
+    {
+      key: 'moldName',
+      label: 'MOLD NAME'
+    },
+    {
+      key: 'customer',
+      label: 'CUSTOMER'
+    },
+    {
+      key: 'status',
+      label: 'STATUS',
+      render: value => <StatusBadge status={value} />
+    }
+  ];
+
+  return (
+    <section className="panel">
+      <div className="panel-heading">
+        <div>
+          <h3>Recent Molds</h3>
+          <p>Recently registered molds</p>
+        </div>
+
+        <button className="link-button" onClick={onViewAll}>
+          View All
+        </button>
+      </div>
+
+      <DataTable columns={columns} data={molds} />
+    </section>
+  );
+}
+
+
+import { Clock3 } from 'lucide-react';
+import StatusBadge from '../common/StatusBadge';
+
+export default function PendingTasks({ tasks = [] }) {
+  return (
+    <section className="panel">
+      <div className="panel-heading">
+        <div>
+          <h3>Pending Activities</h3>
+          <p>Tasks requiring attention</p>
+        </div>
+      </div>
+
+      <div className="pending-task-list">
+        {tasks.length === 0 ? (
+          <p>No pending activities.</p>
+        ) : (
+          tasks.map(task => (
+            <div className="pending-task" key={task.id}>
+              <Clock3 size={18} />
+
+              <div>
+                <strong>{task.title}</strong>
+                <small>
+                  {task.moldCode} · Due {task.dueDate}
+                </small>
+              </div>
+
+              <StatusBadge status={task.status} />
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+import React, { useState } from "react";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+
+export default function AppLayout({ activePage, onNavigate, children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleNavigate = (page) => {
+    onNavigate(page);
+    setSidebarOpen(false);
+  };
+
+  return (
+    <div style={styles.app}>
+      {sidebarOpen && (
+        <div
+          style={styles.overlay}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        style={{
+          ...styles.sidebar,
+          ...(sidebarOpen ? styles.sidebarOpen : {}),
+        }}
+      >
+        <Sidebar
+          activePage={activePage}
+          onNavigate={handleNavigate}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </aside>
+
+      <div style={styles.main}>
+        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+
+        <main style={styles.content}>
+          {children}
+        </main>
+
+        <footer style={styles.footer}>
+          MRTMS – Mold Tracking & Management System
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  app: {
+    display: "flex",
+    minHeight: "100vh",
+    background: "#f4f7fb",
+    fontFamily: "Arial, sans-serif",
+    position: "relative",
+  },
+  sidebar: {
+    width: 250,
+    minWidth: 250,
+    background: "#142b45",
+    minHeight: "100vh",
+    position: "sticky",
+    top: 0,
+    height: "100vh",
+    overflowY: "auto",
+    zIndex: 20,
+  },
+  main: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+  },
+  content: {
+    flex: 1,
+    padding: 25,
+    minWidth: 0,
+    width: "100%",
+    boxSizing: "border-box",
+  },
+  footer: {
+    padding: "14px 25px",
+    color: "#94a3b8",
+    fontSize: 11,
+    borderTop: "1px solid #e8edf3",
+    background: "#fff",
+  },
+  overlay: {
+    display: "none",
+  },
+  sidebarOpen: {
+    transform: "translateX(0)",
+  },
+};
 import React, { useState } from 'react'
 import AppLayout from './components/layout/AppLayout'
 
@@ -303,315 +513,3 @@ const styles = {
   }
 }
 
-// import React, { useState } from 'react';
-
-// import Sidebar from './components/layout/Sidebar';
-// import Header from './components/layout/Header';
-// import Breadcrumb from './components/layout/Breadcrumb';
-// import PageHeader from './components/layout/PageHeader';
-
-// import Button from './components/common/Button';
-// import SearchBar from './components/common/SearchBar';
-// import StatusBadge from './components/common/StatusBadge';
-
-// import StatCard from './components/dashboard/StatCard';
-// import RecentMolds from './components/dashboard/RecentMolds';
-// import PendingTasks from './components/dashboard/PendingTasks';
-
-// const moldRecords = [
-//   {
-//     id: 1,
-//     moldCode: 'MOLD-001',
-//     moldName: 'Front Cover Mold',
-//     partName: 'Front Cover',
-//     machine: 'IMM-250',
-//     status: 'ACTIVE',
-//     location: 'Molding',
-//     updatedAt: '24 Nov 2026'
-//   },
-//   {
-//     id: 2,
-//     moldCode: 'MOLD-002',
-//     moldName: 'Rear Housing Mold',
-//     partName: 'Rear Housing',
-//     machine: 'IMM-350',
-//     status: 'UNDER_TRIAL',
-//     location: 'Trial Room',
-//     updatedAt: '23 Nov 2026'
-//   },
-//   {
-//     id: 3,
-//     moldCode: 'MOLD-003',
-//     moldName: 'Handle Mold',
-//     partName: 'Handle',
-//     machine: 'IMM-180',
-//     status: 'UNDER_MAINTENANCE',
-//     location: 'Maintenance',
-//     updatedAt: '22 Nov 2026'
-//   }
-// ];
-
-// const pendingTasks = [
-//   {
-//     id: 1,
-//     title: 'MOLD-003 - Maintenance inspection',
-//     description: 'Complete the scheduled inspection',
-//     dueDate: 'Today',
-//     priority: 'High'
-//   },
-//   {
-//     id: 2,
-//     title: 'MOLD-002 - Trial approval',
-//     description: 'Trial result awaiting approval',
-//     dueDate: 'Tomorrow',
-//     priority: 'Medium'
-//   },
-//   {
-//     id: 3,
-//     title: 'MOLD-015 - Update mold details',
-//     description: 'Complete missing mold information',
-//     dueDate: '26 Nov 2026',
-//     priority: 'Low'
-//   }
-// ];
-
-// function App() {
-//   const [activePath, setActivePath] = useState('/dashboard');
-//   const [search, setSearch] = useState('');
-//   const [menuOpen, setMenuOpen] = useState(false);
-
-//   const navigation = [
-//     { path: '/dashboard', label: 'Dashboard' },
-//     { path: '/molds', label: 'Mold Register' },
-//     { path: '/trials', label: 'Trial Management' },
-//     { path: '/tasks', label: 'Task & Workflows' },
-//     { path: '/reports', label: 'Reports' },
-//     { path: '/users', label: 'Users' },
-//     { path: '/settings', label: 'Settings' }
-//   ];
-
-//   const activeItem =
-//     navigation.find(item => item.path === activePath);
-
-//   const pageTitle = activeItem?.label || 'Dashboard';
-
-//   const filteredMolds = moldRecords.filter(mold =>
-//     `${mold.moldCode} ${mold.moldName} ${mold.partName}`
-//       .toLowerCase()
-//       .includes(search.toLowerCase())
-//   );
-
-//   const handleNavigate = path => {
-//     setActivePath(path);
-//     setSearch('');
-//     setMenuOpen(false);
-//   };
-
-//   return (
-//     <div className="app-shell">
-
-//       <Sidebar
-//         activePath={activePath}
-//         onNavigate={handleNavigate}
-//       />
-
-//       <div className="app-main">
-
-//         <Header
-//           onMenuClick={() => setMenuOpen(!menuOpen)}
-//           user={{
-//             name: 'Molding Admin',
-//             role: 'Molding Department'
-//           }}
-//         />
-
-//         <main className="page-content">
-
-//           <Breadcrumb
-//             items={['Home', pageTitle]}
-//           />
-
-//           <PageHeader
-//             title={pageTitle}
-//             subtitle={
-//               activePath === '/dashboard'
-//                 ? 'Monitor mold activities and department performance.'
-//                 : `Manage ${pageTitle.toLowerCase()} information.`
-//             }
-//             actions={
-//               activePath === '/dashboard' ? (
-//                 <Button
-//                   variant="primary"
-//                   onClick={() => handleNavigate('/add-mold')}
-//                 >
-//                   + Register New Mold
-//                 </Button>
-//               ) : null
-//             }
-//           />
-
-//           {activePath === '/dashboard' && (
-//             <>
-//               <section className="stats-grid">
-
-//                 <StatCard
-//                   title="Total Molds"
-//                   value="248"
-//                   icon="Package"
-//                   color="blue"
-//                   trend="+12 this month"
-//                 />
-
-//                 <StatCard
-//                   title="Active Molds"
-//                   value="186"
-//                   icon="CheckCircle"
-//                   color="green"
-//                   trend="Currently active"
-//                 />
-
-//                 <StatCard
-//                   title="Under Maintenance"
-//                   value="18"
-//                   icon="Wrench"
-//                   color="orange"
-//                   trend="Needs attention"
-//                 />
-
-//                 <StatCard
-//                   title="Pending Tasks"
-//                   value="12"
-//                   icon="Clock"
-//                   color="red"
-//                   trend="Awaiting action"
-//                 />
-
-//               </section>
-
-//               <section className="dashboard-grid">
-
-//                 <div className="panel dashboard-molds">
-//                   <div className="panel-heading">
-//                     <div>
-//                       <h3>Recent Mold Records</h3>
-//                       <p>Recently updated mold information</p>
-//                     </div>
-
-//                     <Button
-//                       variant="outline"
-//                       size="small"
-//                       onClick={() =>
-//                         handleNavigate('/molds')
-//                       }
-//                     >
-//                       View All
-//                     </Button>
-//                   </div>
-
-//                   <SearchBar
-//                     value={search}
-//                     onChange={setSearch}
-//                     placeholder="Search mold code or name..."
-//                   />
-
-//                   <div className="mold-record-list">
-//                     {filteredMolds.map(mold => (
-//                       <div className="mold-record" key={mold.id}>
-//                         <div className="mold-record-info">
-//                           <strong>{mold.moldCode}</strong>
-//                           <span>{mold.moldName}</span>
-//                           <small>{mold.machine} · {mold.location}</small>
-//                         </div>
-
-//                         <StatusBadge status={mold.status} />
-//                       </div>
-//                     ))}
-
-//                     {filteredMolds.length === 0 && (
-//                       <p className="no-records">
-//                         No matching mold records found.
-//                       </p>
-//                     )}
-//                   </div>
-//                 </div>
-
-//                 <div className="panel dashboard-tasks">
-//                   <PendingTasks tasks={pendingTasks} />
-//                 </div>
-
-//               </section>
-//             </>
-//           )}
-
-//           {activePath === '/molds' && (
-//             <section className="panel">
-//               <div className="panel-heading">
-//                 <div>
-//                   <h3>Mold Register</h3>
-//                   <p>All registered molding tools</p>
-//                 </div>
-
-//                 <Button
-//                   onClick={() => handleNavigate('/add-mold')}
-//                 >
-//                   + Add Mold
-//                 </Button>
-//               </div>
-
-//               <SearchBar
-//                 value={search}
-//                 onChange={setSearch}
-//                 placeholder="Search mold records..."
-//               />
-
-//               <div className="mold-record-list">
-//                 {filteredMolds.map(mold => (
-//                   <div className="mold-record" key={mold.id}>
-//                     <div className="mold-record-info">
-//                       <strong>{mold.moldCode}</strong>
-//                       <span>{mold.moldName}</span>
-//                       <small>{mold.partName} · {mold.machine}</small>
-//                     </div>
-//                     <StatusBadge status={mold.status} />
-//                   </div>
-//                 ))}
-//               </div>
-//             </section>
-//           )}
-
-//           {activePath !== '/dashboard' &&
-//             activePath !== '/mold-register' && (
-//               <section className="panel module-placeholder">
-//                 <h3>{pageTitle}</h3>
-//                 <p>
-//                   This module will be designed using the reusable
-//                   MRTMS components in the next development stage.
-//                 </p>
-//               </section>
-//             )}
-
-//         </main>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-
-main.jsx - 
-
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App.jsx";
-
-import "./assets/styles/variables.css";
-import "./assets/styles/global.css";
-import "./assets/styles/utilities.css";
-import "./assets/styles/components.css";
-
-createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
