@@ -1,43 +1,614 @@
+Step 1. Add code to MoldStatusOverview.jsx
+File: src/components/dashboard/MoldStatusOverview.jsx
 
-/* =================================
-   MRTMS DASHBOARD LAYOUT
-================================= */
+import React from "react";
 
-.dashboard-page {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+const moldStatuses = [
+  { name: "Active", count: 186, color: "green" },
+  { name: "Under Maintenance", count: 18, color: "orange" },
+  { name: "Pending", count: 32, color: "yellow" },
+  { name: "Completed", count: 12, color: "blue" },
+];
+
+export default function MoldStatusOverview() {
+  const total = moldStatuses.reduce((sum, item) => sum + item.count, 0);
+
+  return (
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-heading">
+        <div>
+          <h3>Mold Status Overview</h3>
+          <p>Current status of registered molds</p>
+        </div>
+      </div>
+
+      <div className="status-overview-total">
+        <strong>{total}</strong>
+        <span>Total molds</span>
+      </div>
+
+      <div className="status-overview-list">
+        {moldStatuses.map((item) => (
+          <div className="status-overview-item" key={item.name}>
+            <div className="status-overview-label">
+              <span className={`status-dot ${item.color}`} />
+              <span>{item.name}</span>
+              <strong>{item.count}</strong>
+            </div>
+
+            <div className="status-progress-track">
+              <div
+                className={`status-progress-fill ${item.color}`}
+                style={{ width: `${(item.count / total) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
-.dashboard-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  width: 100%;
+
+
+Step 2. Add code to DepartmentPendingChart.jsx
+File: src/components/dashboard/DepartmentPendingChart.jsx
+
+import React from "react";
+
+const departments = [
+  { name: "Tool Room", pending: 12 },
+  { name: "Maintenance", pending: 8 },
+  { name: "Quality", pending: 6 },
+  { name: "Production", pending: 4 },
+  { name: "Design", pending: 2 },
+];
+
+export default function DepartmentPendingChart() {
+  const maximum = Math.max(...departments.map((item) => item.pending));
+
+  return (
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-heading">
+        <div>
+          <h3>Department Pending Overview</h3>
+          <p>Open activities by department</p>
+        </div>
+      </div>
+
+      <div className="department-chart">
+        {departments.map((item) => (
+          <div className="department-chart-row" key={item.name}>
+            <span className="department-chart-name">{item.name}</span>
+
+            <div className="department-chart-track">
+              <div
+                className="department-chart-fill"
+                style={{ width: `${(item.pending / maximum) * 100}%` }}
+              />
+            </div>
+
+            <strong>{item.pending}</strong>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
-.dashboard-main-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-  width: 100%;
+
+
+Step 3. Add code to TrialLeadTimeChart.jsx
+File: src/components/dashboard/TrialLeadTimeChart.jsx
+
+This shows sample lead-time days for trials T2 to T10. Later, we will calculate these from actual feedback and trial dates.
+
+import React from "react";
+
+const trialData = [
+  { trial: "T2", days: 18 },
+  { trial: "T3", days: 22 },
+  { trial: "T4", days: 15 },
+  { trial: "T5", days: 27 },
+  { trial: "T6", days: 20 },
+  { trial: "T7", days: 16 },
+  { trial: "T8", days: 24 },
+  { trial: "T9", days: 19 },
+  { trial: "T10", days: 14 },
+];
+
+export default function TrialLeadTimeChart() {
+  const maximum = Math.max(...trialData.map((item) => item.days));
+
+  return (
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-heading">
+        <div>
+          <h3>Trial Lead Time Comparison</h3>
+          <p>Average lead time by trial number</p>
+        </div>
+        <span className="chart-unit">Days</span>
+      </div>
+
+      <div className="trial-chart">
+        {trialData.map((item) => (
+          <div className="trial-chart-column" key={item.trial}>
+            <strong>{item.days}</strong>
+
+            <div className="trial-chart-bar-area">
+              <div
+                className="trial-chart-bar"
+                style={{ height: `${(item.days / maximum) * 100}%` }}
+              />
+            </div>
+
+            <span>{item.trial}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
-.dashboard-page > * {
+
+
+Step 4. Add code to RecentActivities.jsx
+File: src/components/dashboard/RecentActivities.jsx
+
+import React from "react";
+
+const activities = [
+  {
+    id: 1,
+    title: "New mold registered",
+    description: "MOLD-006 was added to the mold register",
+    time: "Today, 10:30 AM",
+  },
+  {
+    id: 2,
+    title: "Department task completed",
+    description: "Tool Room completed work for MOLD-001",
+    time: "Today, 09:45 AM",
+  },
+  {
+    id: 3,
+    title: "Customer feedback received",
+    description: "Feedback received for MOLD-003",
+    time: "Yesterday, 04:15 PM",
+  },
+  {
+    id: 4,
+    title: "Trial sample recorded",
+    description: "T3 sample details updated for MOLD-002",
+    time: "Yesterday, 02:20 PM",
+  },
+];
+
+export default function RecentActivities() {
+  return (
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-heading">
+        <div>
+          <h3>Recent Activities</h3>
+          <p>Latest updates in the system</p>
+        </div>
+      </div>
+
+      <div className="recent-activities-list">
+        {activities.map((activity) => (
+          <div className="recent-activity-item" key={activity.id}>
+            <span className="activity-indicator" />
+
+            <div className="recent-activity-content">
+              <strong>{activity.title}</strong>
+              <p>{activity.description}</p>
+              <span>{activity.time}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+
+Step 5. Add code to UpcomingMaintenance.jsx
+File: src/components/dashboard/UpcomingMaintenance.jsx
+
+import React from "react";
+
+const maintenanceRecords = [
+  {
+    id: 1,
+    moldCode: "MOLD-001",
+    activity: "Routine inspection",
+    date: "28 Nov 2026",
+    priority: "High",
+  },
+  {
+    id: 2,
+    moldCode: "MOLD-004",
+    activity: "Preventive maintenance",
+    date: "30 Nov 2026",
+    priority: "Medium",
+  },
+  {
+    id: 3,
+    moldCode: "MOLD-007",
+    activity: "Mold cleaning",
+    date: "03 Dec 2026",
+    priority: "Low",
+  },
+];
+
+export default function UpcomingMaintenance() {
+  return (
+    <section className="dashboard-panel">
+      <div className="dashboard-panel-heading">
+        <div>
+          <h3>Upcoming Maintenance</h3>
+          <p>Scheduled mold maintenance activities</p>
+        </div>
+      </div>
+
+      <div className="maintenance-list">
+        {maintenanceRecords.map((item) => (
+          <div className="maintenance-item" key={item.id}>
+            <div className="maintenance-details">
+              <strong>{item.moldCode}</strong>
+              <span>{item.activity}</span>
+              <small>{item.date}</small>
+            </div>
+
+            <span
+              className={`maintenance-priority ${item.priority.toLowerCase()}`}
+            >
+              {item.priority}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+
+
+Step 6. Connect all five components to Dashboard.jsx
+Open src/pages/Dashboard.jsx.
+
+Add these imports below your existing dashboard imports:
+import MoldStatusOverview from "../components/dashboard/MoldStatusOverview";
+import DepartmentPendingChart from "../components/dashboard/DepartmentPendingChart";
+import TrialLeadTimeChart from "../components/dashboard/TrialLeadTimeChart";
+import RecentActivities from "../components/dashboard/RecentActivities";
+import UpcomingMaintenance from "../components/dashboard/UpcomingMaintenance";
+
+
+Then, inside the main <div className="dashboard-page">, after your existing dashboard-main-grid section, add:
+{/* Mold status and department pending */}
+<div className="dashboard-main-grid">
+  <MoldStatusOverview />
+  <DepartmentPendingChart />
+</div>
+
+{/* Trial lead time */}
+<TrialLeadTimeChart />
+
+{/* Recent activities and maintenance */}
+<div className="dashboard-main-grid">
+  <RecentActivities />
+  <UpcomingMaintenance />
+</div>
+
+
+Do not remove your existing KPI cards, RecentMolds or PendingTasks.
+Step 7. Add CSS for the five components
+Open src/assets/styles/components.css and add this at the bottom:
+
+/* =====================================
+   DASHBOARD ANALYTICS COMPONENTS
+===================================== */
+
+.dashboard-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
   min-width: 0;
 }
 
-@media (max-width: 1100px) {
-  .dashboard-stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.dashboard-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dashboard-panel-heading h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #172b4d;
+  margin: 0 0 5px;
+}
+
+.dashboard-panel-heading p {
+  font-size: 12px;
+  color: #8492a6;
+  margin: 0;
+}
+
+.status-overview-total {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+
+.status-overview-total strong {
+  font-size: 28px;
+  color: #172b4d;
+}
+
+.status-overview-total span {
+  color: #8492a6;
+  font-size: 12px;
+}
+
+.status-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.status-overview-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: #52627a;
+  margin-bottom: 8px;
+}
+
+.status-overview-label strong {
+  margin-left: auto;
+  color: #172b4d;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.status-dot.green,
+.status-progress-fill.green {
+  background: #16a085;
+}
+
+.status-dot.orange,
+.status-progress-fill.orange {
+  background: #f39c12;
+}
+
+.status-dot.yellow,
+.status-progress-fill.yellow {
+  background: #eab308;
+}
+
+.status-dot.blue,
+.status-progress-fill.blue {
+  background: #3b82f6;
+}
+
+.status-progress-track,
+.department-chart-track {
+  width: 100%;
+  height: 8px;
+  background: #edf1f5;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.status-progress-fill,
+.department-chart-fill {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.department-chart-fill {
+  background: #159c9b;
+}
+
+.department-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.department-chart-row {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr) 25px;
+  align-items: center;
+  gap: 12px;
+}
+
+.department-chart-name {
+  color: #52627a;
+  font-size: 12px;
+}
+
+.department-chart-row strong {
+  font-size: 12px;
+  color: #172b4d;
+  text-align: right;
+}
+
+.chart-unit {
+  font-size: 12px;
+  color: #8492a6;
+}
+
+.trial-chart {
+  height: 220px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 12px;
+  padding: 12px 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.trial-chart-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  gap: 8px;
+}
+
+.trial-chart-column strong {
+  color: #52627a;
+  font-size: 11px;
+}
+
+.trial-chart-bar-area {
+  width: 100%;
+  height: 145px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.trial-chart-bar {
+  width: min(35px, 75%);
+  min-height: 5px;
+  background: #159c9b;
+  border-radius: 5px 5px 0 0;
+}
+
+.trial-chart-column span {
+  font-size: 11px;
+  color: #52627a;
+  padding-bottom: 8px;
+}
+
+.recent-activities-list,
+.maintenance-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-activity-item {
+  display: flex;
+  gap: 13px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.recent-activity-item:first-child,
+.maintenance-item:first-child {
+  padding-top: 0;
+}
+
+.recent-activity-item:last-child,
+.maintenance-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activity-indicator {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #159c9b;
+  margin-top: 5px;
+}
+
+.recent-activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recent-activity-content strong,
+.maintenance-details strong {
+  font-size: 13px;
+  color: #172b4d;
+}
+
+.recent-activity-content p,
+.maintenance-details span {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.recent-activity-content > span,
+.maintenance-details small {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.maintenance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.maintenance-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.maintenance-priority {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 20px;
+}
+
+.maintenance-priority.high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.maintenance-priority.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.maintenance-priority.low {
+  background: #dcfce7;
+  color: #166534;
 }
 
 @media (max-width: 700px) {
-  .dashboard-stats-grid,
-  .dashboard-main-grid {
-    grid-template-columns: 1fr;
+  .dashboard-panel {
+    padding: 15px;
+  }
+
+  .department-chart-row {
+    grid-template-columns: 85px minmax(0, 1fr) 22px;
+    gap: 8px;
+  }
+
+  .trial-chart {
+    gap: 5px;
   }
 }
+
+
+
+
+Step 8. Expected final Dashboard
