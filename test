@@ -1,52 +1,901 @@
+Step 1 — Update src/data/mockData.js
+Open src/data/mockData.js.
+
+Delete its existing contents and replace them with the complete code below.
+
+I've used the two mold numbers and all 40 activities you supplied. Since you haven't provided customer, model, group or current status details for these two molds, I've marked those fields as Not provided rather than inventing them.
+
 export const initialMolds = [
   {
     id: 1,
-    moldNo: 'MOLD-001',
-    customer: 'Customer A',
-    model: 'Model X',
-    group: 'Automotive',
+    moldNo: "478KA466300",
+    customer: "Not provided",
+    model: "Not provided",
+    group: "Not specified",
     count: 1,
-    subsidiary: 'India',
-    status: 'Active'
+    subsidiary: "Not specified",
+    status: "Not specified",
   },
   {
     id: 2,
-    moldNo: 'MOLD-002',
-    customer: 'Customer B',
-    model: 'Model Y',
-    group: 'Automotive',
-    count: 2,
-    subsidiary: 'India',
-    status: 'Pending'
-  },
-  {
-    id: 3,
-    moldNo: 'MOLD-003',
-    customer: 'Customer C',
-    model: 'Model Z',
-    group: 'Industrial',
+    moldNo: "478KA430900",
+    customer: "Not provided",
+    model: "Not provided",
+    group: "Not specified",
     count: 1,
-    subsidiary: 'India',
-    status: 'Completed'
+    subsidiary: "Not specified",
+    status: "Not specified",
   },
-  {
-    id: 4,
-    moldNo: 'MOLD-004',
-    customer: 'Customer D',
-    model: 'Model P',
-    group: 'Automotive',
-    count: 3,
-    subsidiary: 'India',
-    status: 'Under Maintenance'
-  },
-  {
-    id: 5,
-    moldNo: 'MOLD-005',
-    customer: 'Customer A',
-    model: 'Model Q',
-    group: 'Industrial',
-    count: 1,
-    subsidiary: 'India',
-    status: 'Active'
+];
+
+// Every Excel U-number is stored as a separate activity.
+// Dates use YYYY-MM-DD format for reliable calculations.
+
+export const moldActivityHistory = {
+  "478KA466300": [
+    {
+      sequence: 1,
+      department: "Molding",
+      date: "2025-07-26",
+      activity: "Mold received",
+      trialNo: "T1",
+    },
+    {
+      sequence: 2,
+      department: "Design",
+      date: "2025-08-08",
+      activity: "Modification - Cond pot & insert (Avg wall thk)",
+      trialNo: "T1",
+    },
+    {
+      sequence: 3,
+      department: "Mfg + Assy",
+      date: "2025-08-08",
+      activity: "Modification is in process",
+      trialNo: "T1",
+    },
+    {
+      sequence: 4,
+      department: "Molding",
+      date: "2025-08-13",
+      activity: "Modification part received, trial is in process",
+      trialNo: "T1",
+    },
+    {
+      sequence: 5,
+      department: "BI",
+      date: "2025-08-19",
+      activity: "T1",
+      trialNo: "T1",
+    },
+    {
+      sequence: 6,
+      department: "Sales",
+      date: "2025-08-23",
+      activity: "T1 report sent",
+      trialNo: "T1",
+    },
+    {
+      sequence: 7,
+      department: "Molding",
+      date: "2025-08-28",
+      activity: "T2 trial - Fish Eye / Fish Ring",
+      trialNo: "T2",
+    },
+    {
+      sequence: 8,
+      department: "Design",
+      date: "2025-08-30",
+      activity: "Modification - Cond pot (Body ring)",
+      trialNo: "T2",
+    },
+    {
+      sequence: 9,
+      department: "Mfg + Assy",
+      date: "2025-09-02",
+      activity: "Modification is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 10,
+      department: "Molding",
+      date: "2025-09-03",
+      activity: "Modification part received, trial is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 11,
+      department: "Design",
+      date: "2025-09-05",
+      activity: "Modification - Cond pot (good result)",
+      trialNo: "T2",
+    },
+    {
+      sequence: 12,
+      department: "Mfg + Assy",
+      date: "2025-09-06",
+      activity: "Modification is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 13,
+      department: "Molding",
+      date: "2025-09-08",
+      activity: "Modification part received, trial is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 14,
+      department: "Design",
+      date: "2025-09-15",
+      activity: "Modification - Cond pot (Body ring)",
+      trialNo: "T2",
+    },
+    {
+      sequence: 15,
+      department: "Mfg + Assy",
+      date: "2025-09-17",
+      activity: "Modification is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 16,
+      department: "Molding",
+      date: "2025-09-20",
+      activity: "Modification part received, trial is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 17,
+      department: "BI",
+      date: "2025-09-23",
+      activity: "T2",
+      trialNo: "T2",
+    },
+    {
+      sequence: 18,
+      department: "Sales",
+      date: "2025-09-23",
+      activity: "T2 report sent",
+      trialNo: "T2",
+    },
+    {
+      sequence: 19,
+      department: "Molding",
+      date: "2025-10-11",
+      activity: "T3 trial - Extra samples",
+      trialNo: "T3",
+    },
+    {
+      sequence: 20,
+      department: "BI",
+      date: "2025-11-07",
+      activity: "T3",
+      trialNo: "T3",
+    },
+    {
+      sequence: 21,
+      department: "Sales",
+      date: "2025-11-13",
+      activity: "T3 report sent",
+      trialNo: "T3",
+    },
+  ],
+
+  "478KA430900": [
+    {
+      sequence: 1,
+      department: "Molding",
+      date: "2024-12-23",
+      activity: "Mold received",
+      trialNo: "T1",
+    },
+    {
+      sequence: 2,
+      department: "Design",
+      date: "2024-12-30",
+      activity: "Modification - Blow cavity (neck height)",
+      trialNo: "T1",
+    },
+    {
+      sequence: 3,
+      department: "Mfg + Assy",
+      date: "2024-12-31",
+      activity: "Modification is in process",
+      trialNo: "T1",
+    },
+    {
+      sequence: 4,
+      department: "Molding",
+      date: "2025-01-03",
+      activity: "Modification part received, trial is in process",
+      trialNo: "T1",
+    },
+    {
+      sequence: 5,
+      department: "BI",
+      date: "2025-01-04",
+      activity: "T1",
+      trialNo: "T1",
+    },
+    {
+      sequence: 6,
+      department: "Sales",
+      date: "2025-01-08",
+      activity: "T1 report sent",
+      trialNo: "T1",
+    },
+    {
+      sequence: 7,
+      department: "BI",
+      date: "2025-03-06",
+      activity: "T2 trial - Top load",
+      trialNo: "T2",
+    },
+    {
+      sequence: 8,
+      department: "Sales",
+      date: "2025-03-12",
+      activity: "BI feedback - Discuss with customer",
+      trialNo: "T2",
+    },
+    {
+      sequence: 9,
+      department: "Design",
+      date: "2025-03-29",
+      activity: "Modification - Lip Cavity B",
+      trialNo: "T2",
+    },
+    {
+      sequence: 10,
+      department: "Mfg + Assy",
+      date: "2025-04-02",
+      activity: "Modification is in process",
+      trialNo: "T2",
+    },
+    {
+      sequence: 11,
+      department: "Molding",
+      date: "2025-04-20",
+      activity: "Modification part received",
+      trialNo: "T2",
+    },
+    {
+      sequence: 12,
+      department: "BI",
+      date: "2025-05-09",
+      activity: "T2",
+      trialNo: "T2",
+    },
+    {
+      sequence: 13,
+      department: "Sales",
+      date: "2025-05-17",
+      activity: "T2 report sent",
+      trialNo: "T2",
+    },
+    {
+      sequence: 14,
+      department: "Molding",
+      date: "2025-05-28",
+      activity: "T3 trial - Shoulder P/L mismatch & stability",
+      trialNo: "T3",
+    },
+    {
+      sequence: 15,
+      department: "Design",
+      date: "2025-06-19",
+      activity: "Modification - Heating pot B (etching not clear)",
+      trialNo: "T3",
+    },
+    {
+      sequence: 16,
+      department: "Mfg + Assy",
+      date: "2025-06-21",
+      activity: "Modification is in process",
+      trialNo: "T3",
+    },
+    {
+      sequence: 17,
+      department: "Molding",
+      date: "2025-06-23",
+      activity: "Modification part received, trial is in process",
+      trialNo: "T3",
+    },
+    {
+      sequence: 18,
+      department: "BI",
+      date: "2025-06-26",
+      activity: "T3",
+      trialNo: "T3",
+    },
+    {
+      sequence: 19,
+      department: "Sales",
+      date: "2025-06-30",
+      activity: "T3 report sent",
+      trialNo: "T3",
+    },
+  ],
+};
+
+
+
+What we achieved: Your two real molds now have separate activity histories. Every original U-number has its own record, and repeated department entries remain separate.
+Step 2 — Update src/pages/MoldDetailsPage.jsx
+Now we connect the activity history to the Mold Details screen.
+
+Replace your complete existing MoldDetailsPage.jsx with this:
+
+import React, { useMemo, useState } from "react";
+import { moldActivityHistory } from "../data/mockData";
+
+const tabs = [
+  "Overview",
+  "Trial History",
+  "Customer Feedback",
+  "Department Tasks",
+  "Movement History",
+];
+
+function formatDate(dateString) {
+  const [year, month, day] = dateString.split("-").map(Number);
+
+  return new Date(year, month - 1, day).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getCalendarDays(startDate, endDate) {
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+
+  return Math.round((end - start) / (1000 * 60 * 60 * 24));
+}
+
+export default function MoldDetailsPage({ mold, onBack }) {
+  const [activeTab, setActiveTab] = useState("Overview");
+
+  const activities = useMemo(() => {
+    if (!mold) return [];
+
+    return [...(moldActivityHistory[mold.moldNo] || [])].sort(
+      (a, b) => a.sequence - b.sequence
+    );
+  }, [mold]);
+
+  const trialGroups = useMemo(() => {
+    const groups = {};
+
+    activities.forEach((activity) => {
+      if (!groups[activity.trialNo]) {
+        groups[activity.trialNo] = [];
+      }
+
+      groups[activity.trialNo].push(activity);
+    });
+
+    return Object.entries(groups).map(([trialNo, records]) => ({
+      trialNo,
+      records,
+      startDate: records[0].date,
+      endDate: records[records.length - 1].date,
+      totalDays: getCalendarDays(
+        records[0].date,
+        records[records.length - 1].date
+      ),
+    }));
+  }, [activities]);
+
+  if (!mold) {
+    return (
+      <div className="mold-details-page">
+        <button className="mold-back-button" onClick={onBack}>
+          ← Back to Mold Register
+        </button>
+
+        <div className="mold-details-empty">
+          <h3>No mold selected</h3>
+          <p>Please select a mold from the Mold Register.</p>
+        </div>
+      </div>
+    );
   }
-]
+
+  const overviewItems = [
+    ["Mold Number", mold.moldNo],
+    ["Customer", mold.customer],
+    ["Model", mold.model],
+    ["Group", mold.group || "-"],
+    ["Count", mold.count ?? "-"],
+    ["Subsidiary", mold.subsidiary || "-"],
+    ["Status", mold.status || "-"],
+  ];
+
+  const renderTrialHistory = () => {
+    if (activities.length === 0) {
+      return (
+        <div className="mold-history-empty">
+          <h3>No trial history available</h3>
+          <p>There are no activity records for this mold yet.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="trial-history-container">
+        <div className="trial-history-summary">
+          <div>
+            <span>Total Activities</span>
+            <strong>{activities.length}</strong>
+          </div>
+
+          <div>
+            <span>Total Trials</span>
+            <strong>{trialGroups.length}</strong>
+          </div>
+        </div>
+
+        {trialGroups.map((trial) => (
+          <section className="trial-history-card" key={trial.trialNo}>
+            <div className="trial-history-heading">
+              <div>
+                <span className="trial-history-label">TRIAL CYCLE</span>
+                <h3>{trial.trialNo}</h3>
+                <p>
+                  {formatDate(trial.startDate)} -{" "}
+                  {formatDate(trial.endDate)}
+                </p>
+              </div>
+
+              <div className="trial-duration">
+                <strong>{trial.totalDays}</strong>
+                <span>Calendar days</span>
+              </div>
+            </div>
+
+            <div className="trial-activity-list">
+              {trial.records.map((activity) => {
+                const currentIndex = activities.findIndex(
+                  (item) => item.sequence === activity.sequence
+                );
+
+                const nextActivity = activities[currentIndex + 1];
+
+                const elapsedDays = nextActivity
+                  ? getCalendarDays(activity.date, nextActivity.date)
+                  : null;
+
+                return (
+                  <div
+                    className="trial-activity-item"
+                    key={`${mold.moldNo}-${activity.sequence}`}
+                  >
+                    <div className="trial-activity-marker">
+                      <span></span>
+                    </div>
+
+                    <div className="trial-activity-content">
+                      <div className="trial-activity-top">
+                        <span className="trial-activity-number">
+                          U{activity.sequence}
+                        </span>
+
+                        <span className="trial-activity-date">
+                          {formatDate(activity.date)}
+                        </span>
+                      </div>
+
+                      <h4>{activity.department}</h4>
+
+                      <p>{activity.activity}</p>
+
+                      {nextActivity && (
+                        <span className="trial-elapsed-time">
+                          {elapsedDays} calendar{" "}
+                          {elapsedDays === 1 ? "day" : "days"} until next
+                          recorded activity ({nextActivity.department})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+
+        <div className="trial-history-note">
+          <strong>Duration calculation:</strong>
+          <p>
+            Trial cycle duration is calculated from its first recorded
+            activity to its last recorded activity. The elapsed time shown
+            below each activity is the time until the next recorded event.
+            Neither measurement alone confirms actual department processing
+            time.
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "Overview":
+        return (
+          <div className="mold-overview-section">
+            <div className="mold-details-section-heading">
+              <div>
+                <h3>Basic Mold Information</h3>
+                <p>General information about this registered mold.</p>
+              </div>
+            </div>
+
+            <div className="mold-details-info-grid">
+              {overviewItems.map(([label, value]) => (
+                <div className="mold-details-info-card" key={label}>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "Trial History":
+        return renderTrialHistory();
+
+      case "Customer Feedback":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">02</div>
+            <h3>Customer Feedback History</h3>
+            <p>
+              Customer feedback, received dates, molding decisions and
+              modification cycles will appear here.
+            </p>
+            <span>Feedback history module - to be implemented</span>
+          </div>
+        );
+
+      case "Department Tasks":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">03</div>
+            <h3>Department Work History</h3>
+            <p>
+              Assigned departments, task dates, completion status, remarks
+              and time taken by each department will appear here.
+            </p>
+            <span>Department task module - to be implemented</span>
+          </div>
+        );
+
+      case "Movement History":
+        return (
+          <div className="mold-history-placeholder">
+            <div className="mold-placeholder-icon">04</div>
+            <h3>Mold Movement History</h3>
+            <p>
+              The complete movement and handover history of this mold
+              between Molding and other departments will appear here.
+            </p>
+            <span>Movement history module - to be implemented</span>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="mold-details-page">
+      <div className="mold-details-topbar">
+        <button className="mold-back-button" onClick={onBack}>
+          ← Back to Mold Register
+        </button>
+
+        <span className="mold-details-breadcrumb">
+          Mold Register / Mold Details
+        </span>
+      </div>
+
+      <div className="mold-details-title">
+        <div>
+          <span className="mold-details-eyebrow">MOLD INFORMATION</span>
+          <h2>{mold.moldNo}</h2>
+          <p>
+            {mold.customer} · {mold.model}
+          </p>
+        </div>
+
+        <span
+          className={`mold-status ${String(mold.status || "")
+            .toLowerCase()
+            .replaceAll(" ", "-")}`}
+        >
+          {mold.status || "Unknown"}
+        </span>
+      </div>
+
+      <div className="mold-details-tabs">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={
+              activeTab === tab
+                ? "mold-details-tab active"
+                : "mold-details-tab"
+            }
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      <section className="mold-details-content">
+        {renderTabContent()}
+      </section>
+    </div>
+  );
+}
+
+
+
+Step 3 — Add Trial History CSS
+Open src/assets/styles/mold.css.
+
+Keep all your existing CSS from the previous step. Add the following code at the very bottom.
+
+/* =====================================
+   TRIAL HISTORY
+===================================== */
+
+.trial-history-container {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.trial-history-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.trial-history-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 17px;
+  border: 1px solid #e5eaf0;
+  background: #f8fafc;
+  border-radius: 9px;
+}
+
+.trial-history-summary span {
+  font-size: 12px;
+  color: #7b8797;
+}
+
+.trial-history-summary strong {
+  font-size: 23px;
+  color: #263449;
+}
+
+.trial-history-card {
+  border: 1px solid #e5eaf0;
+  border-radius: 11px;
+  padding: 20px;
+  background: #ffffff;
+}
+
+.trial-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.trial-history-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #7b8797;
+}
+
+.trial-history-heading h3 {
+  margin: 6px 0;
+  font-size: 20px;
+  color: #263449;
+}
+
+.trial-history-heading p {
+  margin: 0;
+  font-size: 12px;
+  color: #8490a0;
+}
+
+.trial-duration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 18px;
+  border-radius: 9px;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.trial-duration strong {
+  font-size: 22px;
+}
+
+.trial-duration span {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.trial-activity-list {
+  padding-top: 20px;
+}
+
+.trial-activity-item {
+  display: flex;
+  gap: 15px;
+  min-height: 110px;
+}
+
+.trial-activity-marker {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.trial-activity-marker::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  bottom: -1px;
+  width: 2px;
+  background: #dce5f0;
+}
+
+.trial-activity-item:last-child .trial-activity-marker::after {
+  display: none;
+}
+
+.trial-activity-marker span {
+  position: relative;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  margin-top: 4px;
+  border: 2px solid #2563eb;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.trial-activity-content {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 22px;
+}
+
+.trial-activity-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.trial-activity-number {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 5px 9px;
+  border-radius: 5px;
+}
+
+.trial-activity-date {
+  color: #8490a0;
+  font-size: 11px;
+}
+
+.trial-activity-content h4 {
+  margin: 0 0 6px;
+  color: #263449;
+  font-size: 14px;
+}
+
+.trial-activity-content p {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.trial-elapsed-time {
+  display: inline-block;
+  margin-top: 9px;
+  color: #667085;
+  font-size: 11px;
+  background: #f4f6f8;
+  padding: 6px 9px;
+  border-radius: 5px;
+}
+
+.trial-history-note {
+  padding: 16px;
+  border: 1px solid #e5eaf0;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.trial-history-note strong {
+  font-size: 12px;
+  color: #344054;
+}
+
+.trial-history-note p {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #667085;
+}
+
+.mold-history-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #667085;
+}
+
+.mold-history-empty h3 {
+  color: #263449;
+}
+
+@media (max-width: 600px) {
+  .trial-history-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .trial-history-card {
+    padding: 14px;
+  }
+
+  .trial-history-heading {
+    align-items: flex-start;
+  }
+
+  .trial-duration {
+    padding: 10px;
+  }
+
+  .trial-activity-top {
+    align-items: flex-start;
+  }
+}
+
+
+
+Step 4 — Check your CSS import
+Open src/main.jsx.
+
+Make sure this line exists with the other CSS imports:
+import "./assets/styles/mold.css";
+
+
+Do not import it a second time if it is already there.
+Step 5 — Test your project
+Run your React application:
+npm run dev
